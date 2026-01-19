@@ -1,9 +1,9 @@
 @file:Suppress("PropertyName") // This is a DTO where the "manifest.json" dictates the name
 @file:OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)
 
-package dev.buildit.hytale
+package dev.buildit.gradle.hytale
 
-import dev.buildit.gradle.ProjectConfig
+import dev.buildit.gradle.BuildItExtension
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.encodeToString
@@ -14,21 +14,20 @@ import java.io.File
 
 
 @Serializable
-data class HytalePluginManifest(
-    val Group: String,
-    val Name: String,
-    var Version: String,
-    val Description: String,
+data class HytaleManifest(
+    val Group: String?,
+    val Name: String?,
+    var Version: String?,
+    val Description: String?,
     val Authors: List<Author>,
-    val Website: String,
+    val Website: String?,
     val DisabledByDefault: Boolean = false,
     var IncludesAssetPack: Boolean = false,
     val Dependencies: Map<String, String> = emptyMap(),
     val OptionalDependencies: Map<String, String> = emptyMap(),
-    val ServerVersion: String,
+    val ServerVersion: String?,
     val Main: String?,
-)
-{
+) {
     @Transient
     private var filePath: File? = null
 
@@ -38,8 +37,7 @@ data class HytalePluginManifest(
         val Role: String? = null,
     )
 
-    fun update(block: HytalePluginManifest.() -> Unit = {}): HytalePluginManifest
-    {
+    fun update(block: HytaleManifest.() -> Unit = {}): HytaleManifest {
         this.apply(block)
 
         val file = filePath ?: throw IllegalStateException(
@@ -52,38 +50,40 @@ data class HytalePluginManifest(
         return this
     }
 
-    companion object
-    {
-        fun from(project: Project): HytalePluginManifest
-        {
+    companion object {
+        val json = Json {
+            prettyPrint = true
+            encodeDefaults = true
+            ignoreUnknownKeys = true
+            explicitNulls = false
+        }
+
+        fun from(project: Project): HytaleManifest {
             val file = findManifestFile(project)
-            val settings = ProjectConfig(project)
+            val settings = BuildItExtension(lazy { project })
 
             return buildManifest(file) {
-                HytalePluginManifest(
+                HytaleManifest(
                     Group = settings.group,
                     Name = settings.name,
                     Version = settings.version,
                     Description = settings.description,
-                    Authors = readAuthors(project),
+                    Authors = listOf(),
                     Website = settings.website,
-                    ServerVersion = project.config("hytale.version").let { version ->
-                        when
-                        {
-                            version.isBlank() -> "*"
+                    ServerVersion = settings.gameVersion.let { version ->
+                        when {
                             version.first().isLetterOrDigit() -> "=$version"
+                            version.isBlank() -> "*"
                             else -> version
                         }
                     },
-                    Main = settings.mainClass.takeIf { settings.mainFile(it, project) != null },
-                    IncludesAssetPack = settings.meta.options
-                        .getOrElse("includeAssetPack", { true }) as Boolean,
+                    Main = settings.mainClass.takeIf { settings.mainFile != null },
+                    IncludesAssetPack = true
                 )
             }
         }
 
-        private fun findManifestFile(project: Project): File
-        {
+        private fun findManifestFile(project: Project): File {
             val sourceSets = project.extensions.getByType(SourceSetContainer::class.java)
             val mainSourceSet = sourceSets.getByName("main")
 
@@ -92,26 +92,7 @@ data class HytalePluginManifest(
                 ?: File(mainSourceSet.resources.srcDirs.first(), "manifest.json")
         }
 
-        private fun readAuthors(project: Project): List<Author> =
-            project.rootProject.file("gradle.authors.json")
-                .takeIf { it.exists() }
-                ?.let { json.decodeFromString<List<Author>>(it.readText()) }
-                .orEmpty()
-
-        private val json = Json {
-            prettyPrint = true
-            encodeDefaults = true
-            ignoreUnknownKeys = true
-            explicitNulls = false
-        }
-
-        private fun Project.config(name: String, default: String? = null): String =
-            providers.gradleProperty(name).let {
-                if (default != null) it.orElse(default) else it
-            }.get()
-
-        private inline fun <reified T> buildManifest(file: File, block: () -> T): T
-        {
+        private inline fun <reified T> buildManifest(file: File, block: () -> T): T {
             val existing = file.takeIf { it.exists() }
                 ?.let { json.parseToJsonElement(it.readText()).jsonObject.toMutableMap() }
                 ?: mutableMapOf()
@@ -120,12 +101,10 @@ data class HytalePluginManifest(
             existing.putAll(newManifest)
 
             return json.decodeFromJsonElement<T>(JsonObject(existing)).also {
-                if (it is HytalePluginManifest)
-                {
+                if (it is HytaleManifest) {
                     it.filePath = file
                 }
             }
         }
-
     }
 }

@@ -10,13 +10,9 @@ version = System.getenv("GITHUB_REF_NAME") ?: "dev"
 
 gradlePlugin {
     plugins {
-        register("setting") {
-            id = "dev.buildit.repository"
-            implementationClass = "dev.buildit.gradle.SettingsPlugin"
-        }
-        register("project") {
-            id = "dev.buildit.project"
-            implementationClass = "dev.buildit.gradle.ProjectPlugin"
+        register("plugin") {
+            id = "com.github.adaliszk.gradle-buildit"
+            implementationClass = "dev.buildit.gradle.GradlePlugin"
         }
     }
 }
@@ -51,7 +47,7 @@ dependencies {
     // Gradle API for the plugin classpath
     compileOnly(gradleApi())
     // Kotlin Gradle Plugin to reference Kotlin DSL classes
-    implementation(kotlin("gradle-plugin"))
+    compileOnly(kotlin("gradle-plugin"))
     implementation(kotlin("stdlib"))
     // Libraries to simplify the implementation
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")

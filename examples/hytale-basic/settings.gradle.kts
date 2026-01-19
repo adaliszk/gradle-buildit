@@ -1,9 +1,8 @@
 
 pluginManagement {
-    includeBuild("../..")  // Points to the root plugin project
+    includeBuild("../..") // <- Simulating JetPack
     plugins {
         id("com.gradleup.shadow") version "9.3.1"
-        kotlin("jvm") version "2.3.0"
     }
     repositories {
         gradlePluginPortal()
@@ -15,9 +14,9 @@ pluginManagement {
 rootProject.name = "example"
 
 plugins {
-    id("dev.buildit.repository")
+    id("com.github.adaliszk.gradle-buildit")
 }
 
 hytale {
-    includeAssetPack = true
+    includeAssetPack()
 }

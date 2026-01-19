@@ -1,105 +1,85 @@
 > [!WARNING]  
 > In active development and experimentation, almost nothing is stable!
 
-_Doing this because I want to learn and eventually write my own mods, so expect rookie mistakes when
-it comes to Java/Kotlin/Gradle practices!_
-
 # BuildIt! Gradle Plugin for Mod Development
 
 The philosophy here is to keep the necessary boilerplate at the absolute minimum while also
-providing a robust and flexible framework for mod development for Hytale, then later to Minecraft.
+providing a robust and flexible framework for mod development for Hytale, _later to Minecraft._
+
+### Features
+
+- Automatic server dependency resolution and manifest generation
+- Minimal boilerplate where you have access to `hytale` block in both settings and build scripts
+- Monorepo support through the usage via `include` within the `common` configuration block
+- Kotlin support by using `useKotlin()` in the `buildit` configuration block
+
+_and more coming soon:tm:_
+
+### Requirements
+
+- IntelliJ IDEA (even Community edition)
+- Java 25, preferably JetBrains downloaded and set as default
+- Hytale installed through the launcher
+
+## Usage
 
 ```kotlin
 // settings.gradle.kts
-
 rootProject.name = "dev.example"
-
 pluginManagement {
     plugins {
+        id("com.github.adaliszk.gradle-buildit") version "dev-snapshot"
         id("com.gradleup.shadow") version "9.3.1"
-        id("dev.buildit.repository") version "dev-snapshot"
-        // ^ Settings plugin for the sections below
     }
     repositories {
+        gradlePluginPortal()
         maven("https://jitpack.io")
-        mavenCentral()
-        mavenLocal()
     }
 }
-
 plugins {
-    id("dev.buildit.repository")
+    id("com.github.adaliszk.gradle-buildit")
 }
-
-buildit {
-    useKotlin() // <- Optionally enable Kotlin, pass dependency string for your own stdlib!
-}
-
-// Include projects from "libraries"
-common {
-    include("api", "another")
-    // ^ Auto-scaffolds these
-}
-
-// Include "targets/hytale" automatically
 hytale {
     includeAssetPack = true
 }
 ```
 
-Developed for a monorepo structure (though it can be also used for regular structure). You have
-access to common libraries that hold your data and functionality between them so that your actual
-mod would only need to wire up components and events.
+### Hytale {}
 
-This is expanded with:
+Resolves either the root or the hytale folder for your mod development, where it automatically
+detects which one by seeing if you used the `common { include() }` before. It automatically creates
+the necessary folder structure and even creates an example main class for you.
 
-## ScaffoldIt! Framework for cross-platform Mods
+Options:
 
-> [!NOTE]  
-> Entirely a concept so far, nothing is implemented!
+- `includeAssetPack(Boolean)`: Whether to include the asset pack via the manifest (default: true)
 
-Taking an idea from Stonecutter for extending the compiler, the main concept with the Scaffolding is
-to provide annotations that will inject commonly used wiring without you needing to know exactly how
-each game or mod-loader provides those functionalities.
+### Common {}
 
-The overall idea is that your mod code will mainly be about wiring known behaviors, interfaces, and
-components without you needing to rewrite the entire mod for each scenario:
+Collects and configures common library packages and adds them to the target projects as
+dependencies, similarly to `hytale` it automatically creates the necessary folder structure, but
+will leave the main class up to you.
 
-```kotlin
-@Definition
-class BuilditPlugin(init: JavaPluginInit) : JavaPlugin(init) {
-    init {
-        use(MyAddonLoader)
-        use(BackgroundTasks)
-    }
+Options:
 
-    @Hook(Lifecycle.LOAD)
-    fun onSetup() {
-        // Custom code here
-    }
-}
+- `include(...Strings) { }`: Include the specified package directory in the common configuration.
+- `useKotlin(dependencyNotation)`: Enable kotlin support only for the common projects.
 
-@Block
-class CreativeMotor : Component<ChunkStore> {
-    init {
-        use(ConfigurableSpeed)
-        use(KineticProducer.of {
-            abs(RPM) * 4096
-        })
-    }
-}
+### BuildIt {}
 
-@Block
-class MechanicalPress : Component<ChunkStore> {
-    init {
-        use(KineticRelay)
-        use(KineticConsumer.of(rpm = 8.0f))
-        use(RecipeProcessor.perCraft {
-            tick = 240 / (1 + (abs(RPM) / 512f) * 59)
-        })
-    }
-}
-```
+Defaults for all the configuration blocks and templates, mainly to support multiple
 
-The rest on how those register is fully automated, and the various components used have
-a platform-independent format, and the ScaffoldIt annotations deal with the wiring.
+Options:
+
+- `useKotlin(dependencyNotation)`: Enable kotlin support only for the buildit projects.
+- `useFlat()`: Turn on flat project structure where `main/java/dev/example` is dropped.
+- `sourceDir = "String"`: The source directory relative from the project path.
+- `resourceDir = "String"`: The resource directory relative from the project path.
+- `testDir = "String"`: The test directory relative from the project path.
+- `commonDir = "String"`: Global common path relative from the root project.
+- `assetDir = "String"`: Global asset directory relative from the root project.
+
+## Contributions
+
+Feel free to open issues or pull requests if you have some problems, you can also reach out to me
+on discord under the nickname of `kicsivazz`.
