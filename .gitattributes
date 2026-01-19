@@ -1,0 +1,2 @@
+gradlew.bat filter=lfs diff=lfs merge=lfs -text
+gradlew filter=lfs diff=lfs merge=lfs -text
