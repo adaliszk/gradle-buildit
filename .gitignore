@@ -1,0 +1,11 @@
+# Tools
+.idea
+.gradle
+
+# Artefacts
+**/.kotlin
+**/build
+
+# Paths
+**/devserver
+**/temp

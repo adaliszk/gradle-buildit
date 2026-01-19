@@ -1,0 +1,81 @@
+plugins {
+    kotlin("jvm") version "2.3.0"
+    kotlin("plugin.serialization") version "2.3.0"
+    `java-gradle-plugin`
+    `maven-publish`
+}
+
+group = "dev.buildit"
+version = System.getenv("GITHUB_REF_NAME") ?: "develop"
+
+gradlePlugin {
+    plugins {
+        register("setting") {
+            id = "dev.buildit.repository"
+            implementationClass = "dev.buildit.gradle.SettingsPlugin"
+        }
+        register("project") {
+            id = "dev.buildit.project"
+            implementationClass = "dev.buildit.gradle.ProjectPlugin"
+        }
+    }
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            from(components["java"])
+        }
+    }
+}
+
+sourceSets {
+    main {
+        kotlin.setSrcDirs(listOf("plugin", "hytale"))
+        java.setSrcDirs(listOf("plugin", "hytale"))
+        resources.setSrcDirs(listOf("resources"))
+    }
+    register("framework") {
+        kotlin.setSrcDirs(listOf("scaffolding"))
+        java.setSrcDirs(listOf("scaffolding"))
+    }
+    test {
+        kotlin.setSrcDirs(listOf("test"))
+        java.setSrcDirs(listOf("test"))
+    }
+}
+
+repositories {
+    gradlePluginPortal()
+    mavenCentral()
+    mavenLocal()
+}
+
+dependencies {
+    // Gradle API for the plugin classpath
+    compileOnly(gradleApi())
+    // Kotlin Gradle Plugin to reference Kotlin DSL classes
+    implementation(kotlin("gradle-plugin"))
+    implementation(kotlin("stdlib"))
+    // Libraries to simplify the implementation
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+}
+
+kotlin {
+    jvmToolchain(25)
+}
+
+//
+// We explicitly set the JVM target to 24 which is the highest supported by Kotlin 2.3.0
+// TODO: Remove the JVM 24 overwrites once Kotlin supports 25!
+//
+
+tasks.withType<JavaCompile>().configureEach {
+    options.release.set(24)
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_24)
+    }
+}

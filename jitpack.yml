@@ -1,0 +1,6 @@
+jdk:
+    - openjdk25
+before_install:
+    - cd gradle
+install:
+    - ../gradlew publishToMavenLocal
