@@ -11,10 +11,25 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import java.io.File
 
 
-abstract class CraftableExtension(protected val settings: Settings) : GradleExtension
+/**
+ * @internal
+ * Shared base extension capabilities based on the Setting itself to register projects,
+ * and auto-configure their:
+ * - plugin repositories
+ * - maven repositories
+ * - language dependencies
+ * - source and resource paths
+ * - tests tasks
+ */
+abstract class GradleExtension(protected val settings: Settings) : GradleExtension
 {
-    private val log: Logger = Logging.getLogger(CraftableExtension::class.java)
-    private val logCtx: String = "> Conf "
+    companion object
+    {
+        /**
+         * Store the library projects that are automatically added to the main ones
+         */
+        val libs = mutableListOf<String>()
+    }
 
     protected val project: Project by lazy {
         settings.gradle.rootProject
@@ -23,20 +38,21 @@ abstract class CraftableExtension(protected val settings: Settings) : GradleExte
     protected val plugin: SettingsExtension
         get() = settings.extensions.getByType(SettingsExtension::class.java)
 
-    companion object
+    fun configureProject(target: Project)
     {
-        val libs = mutableListOf<String>()
+        if (target.subprojects.isNotEmpty()) return
+        bootstrap(target)
     }
 
-    protected val sourceDir: String
-        get() = plugin.sourceDir
+    open fun onConfigure(target: Project)
+    {
+        // Nothing to do here, but can be overridden!
+    }
 
-    protected val resourcesDir: String
-        get() = plugin.resourcesDir
-
-    protected val testsDir: String
-        get() = plugin.testsDir
-
+    open fun configureSettings()
+    {
+        // Nothing to do here, but can be overridden!
+    }
 
     protected fun register(path: String, setupPreset: Project.() -> Unit = {})
     {
@@ -52,46 +68,34 @@ abstract class CraftableExtension(protected val settings: Settings) : GradleExte
 
     protected fun register(path: String, metadata: ProjectMetadata, setupPreset: Project.() -> Unit = {})
     {
-        // Auto-generate registered project paths
-        File(settings.rootDir, path.replace(":", File.separator)).mkdirs()
-        // TODO: Add bootstrapping for a quick start
-
+        bootstrap(path)
         settings.include(path)
         settings.gradle.beforeProject { target ->
             if (target.path == path)
             {
-                metadata.update(target)
-                target.repositories.apply {
-                    mavenCentral()
-                    mavenLocal()
-                }
-                target.pluginManager.apply("java-library")
-                configureKotlin(target)
-                configureSourceSets(target)
-                configureTests(target)
                 target.setupPreset()
+                bootstrap(target)
             }
         }
     }
 
-    open fun configure(target: Project)
+    private fun bootstrap(path: String)
     {
-        // Nothing to do here, but can be overridden!
+        File(settings.rootDir, path.replace(":", File.separator)).mkdirs()
+        // TODO: Add bootstrapping for a quick start
     }
 
-    final override fun configureProject(target: Project)
+    private fun bootstrap(target: Project)
     {
-        if (target.subprojects.isNotEmpty()) return
-
-        project.repositories.apply {
+        metadata.update(target)
+        target.repositories.apply {
             mavenCentral()
             mavenLocal()
         }
-        project.pluginManager.apply("java-library")
+        target.pluginManager.apply("java-library")
         configureKotlin(target)
         configureSourceSets(target)
         configureTests(target)
-        configure(target)
     }
 
     protected open fun configureKotlin(target: Project)
@@ -109,18 +113,18 @@ abstract class CraftableExtension(protected val settings: Settings) : GradleExte
         target.extensions.findByName("sourceSets")?.let { sourceSets ->
             (sourceSets as SourceSetContainer).apply {
                 named("main") {
-                    it.java.setSrcDirs(listOf(sourceDir))
-                    it.resources.setSrcDirs(listOf(resourcesDir))
-                    target.file(sourceDir).mkdirs()
-                    target.file(resourcesDir).mkdirs()
+                    it.java.setSrcDirs(listOf(plugin.sourceDir))
+                    it.resources.setSrcDirs(listOf(plugin.resourcesDir))
+                    target.file(plugin.sourceDir).mkdirs()
+                    target.file(plugin.resourcesDir).mkdirs()
                 }
                 findByName("shared") ?: create("shared") {
                     it.resources.setSrcDirs(listOf(project.file("resources")))
                     project.file("resources").mkdirs()
                 }
                 named("test") {
-                    it.java.setSrcDirs(listOf(testsDir))
-                    target.file(testsDir).mkdirs()
+                    it.java.setSrcDirs(listOf(plugin.testsDir))
+                    target.file(plugin.testsDir).mkdirs()
                 }
             }
         }
@@ -128,36 +132,16 @@ abstract class CraftableExtension(protected val settings: Settings) : GradleExte
         target.plugins.withId("org.jetbrains.kotlin.jvm") {
             target.extensions.getByType(KotlinJvmProjectExtension::class.java).sourceSets.apply {
                 named("main").configure {
-                    it.kotlin.srcDir(sourceDir)  // Add to existing, don't replace
+                    it.kotlin.srcDir(plugin.sourceDir)
                 }
                 findByName("shared")?.apply {
                     resources.setSrcDirs(listOf(project.file("resources")))
                 }
                 named("test").configure {
-                    it.kotlin.srcDir(testsDir)  // Add to existing, don't replace
+                    it.kotlin.srcDir(plugin.testsDir)
                 }
             }
         }
-    }
-
-    private fun configureResourcesTask(target: Project)
-    {
-        val remapSources = target.tasks.register("remapSources", Copy::class.java) { task ->
-            task.from(sourceDir)
-            task.into(target.layout.buildDirectory.dir("generated-src/main"))
-
-            task.eachFile { file ->
-                val packagePath = "dev/buildit/${target.name}/${target.name}"
-                file.path = "$packagePath/${file.path}"
-            }
-        }
-
-//        target.afterEvaluate {
-//            target.tasks.named("processResources", Copy::class.java) { task ->
-//                task.dependsOn(updateManifest)
-//                task.duplicatesStrategy = DuplicatesStrategy.INCLUDE
-//            }
-//        }
     }
 
     protected open fun configureTests(target: Project)

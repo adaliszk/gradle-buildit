@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "dev.buildit"
-version = System.getenv("GITHUB_REF_NAME") ?: "develop"
+version = System.getenv("GITHUB_REF_NAME") ?: "dev"
 
 gradlePlugin {
     plugins {
@@ -31,13 +31,9 @@ publishing {
 
 sourceSets {
     main {
-        kotlin.setSrcDirs(listOf("plugin", "hytale"))
-        java.setSrcDirs(listOf("plugin", "hytale"))
+        kotlin.setSrcDirs(listOf("src"))
+        java.setSrcDirs(listOf("src"))
         resources.setSrcDirs(listOf("resources"))
-    }
-    register("framework") {
-        kotlin.setSrcDirs(listOf("scaffolding"))
-        java.setSrcDirs(listOf("scaffolding"))
     }
     test {
         kotlin.setSrcDirs(listOf("test"))

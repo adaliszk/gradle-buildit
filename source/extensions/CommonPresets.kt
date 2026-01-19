@@ -1,12 +1,12 @@
 @file:Suppress("unused") // The public methods are used by Gradle, but not visible
 
-package dev.buildit.gradle
+package dev.buildit.gradle.extensions
 
 import org.gradle.api.Project
 import org.gradle.api.initialization.Settings
 
 
-open class CommonPresets(settings: Settings) : CraftableExtension(settings)
+open class CommonPresets(settings: Settings) : SettingsExtension(settings)
 {
     fun include(vararg projectPaths: String, userConfig: Project.() -> Unit = {})
     {
@@ -15,7 +15,7 @@ open class CommonPresets(settings: Settings) : CraftableExtension(settings)
 
     fun include(projectPath: String, userConfig: Project.() -> Unit)
     {
-        val resolvedPath = ":libraries:$projectPath"
+        val resolvedPath = ":common:$projectPath"
         libs.add(resolvedPath)
 
         register(resolvedPath) {
