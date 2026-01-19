@@ -40,7 +40,7 @@ plugins {
     id("com.github.adaliszk.gradle-buildit")
 }
 hytale {
-    includeAssetPack = true
+    includeAssetPack()
 }
 ```
 
@@ -83,3 +83,13 @@ Options:
 
 Feel free to open issues or pull requests if you have some problems, you can also reach out to me
 on discord under the nickname of `kicsivazz`.
+
+Current plan:
+
+- [ ] IDEA run configuration generator
+- [ ] Java and Kotlin boilerplate for quick project creation
+- [ ] Bootstrap devserver with a superflat testing world
+- [ ] Examples for Kotlin, Monorepo Java, Monorepo Kotlin, Monorepo Mixed
+- [ ] Bootstrap tests with a boilerplate
+- [ ] Proof of Concept for Kotlin Annotation-based wiring
+- [ ] Auto hot-swapping instead of manual IDEA button usage
