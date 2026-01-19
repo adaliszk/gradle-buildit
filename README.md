@@ -86,10 +86,9 @@ on discord under the nickname of `kicsivazz`.
 
 Current plan:
 
-- [ ] IDEA run configuration generator
-- [ ] Java and Kotlin boilerplate for quick project creation
-- [ ] Bootstrap devserver with a superflat testing world
-- [ ] Examples for Kotlin, Monorepo Java, Monorepo Kotlin, Monorepo Mixed
-- [ ] Bootstrap tests with a boilerplate
-- [ ] Proof of Concept for Kotlin Annotation-based wiring
-- [ ] Auto hot-swapping instead of manual IDEA button usage
+- IDEA run configuration generator
+- Bootstrap devserver with a superflat testing world
+- Examples for Kotlin, Monorepo Java, Monorepo Kotlin, Monorepo Mixed
+- Bootstrap tests with a boilerplate
+- Proof of Concept for Kotlin Annotation-based wiring
+- Auto hot-swapping instead of manual IDEA button usage

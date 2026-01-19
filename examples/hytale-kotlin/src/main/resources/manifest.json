@@ -1,0 +1,14 @@
+{
+    "Group": "BuildIt",
+    "Name": "Hytale-kotlin",
+    "Version": "0.1.0",
+    "Description": "Fantastic mod, beautiful mechanics... people are saying it's amazing.",
+    "Authors": [],
+    "Website": "https://adaliszk.github.io/gradle-buildit-indev",
+    "DisabledByDefault": false,
+    "IncludesAssetPack": true,
+    "Dependencies": {},
+    "OptionalDependencies": {},
+    "ServerVersion": "=2026.1.17-4b0f30090",
+    "Main": "dev.buildit.Example.Plugin"
+}

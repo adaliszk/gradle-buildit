@@ -47,7 +47,7 @@ dependencies {
     // Gradle API for the plugin classpath
     compileOnly(gradleApi())
     // Kotlin Gradle Plugin to reference Kotlin DSL classes
-    compileOnly(kotlin("gradle-plugin"))
+    implementation(kotlin("gradle-plugin"))
     implementation(kotlin("stdlib"))
     // Libraries to simplify the implementation
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")

@@ -1,10 +1,13 @@
 package dev.buildit.gradle
 
 import org.gradle.api.Project
+import org.gradle.api.logging.Logger
+import org.gradle.api.logging.Logging
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.testing.Test
 import org.gradle.testing.jacoco.tasks.JacocoReport
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
+import java.io.File
 
 /**
  * Shared base extension capabilities based on the Setting itself to register projects
@@ -18,18 +21,27 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
  * @internal
  */
 abstract class GradleExtension(protected val pending: Lazy<Project>) {
+    private val log: Logger = Logging.getLogger(GradleExtension::class.java)
+
     protected val project: Project by pending
+    protected val config = BuildItExtension.Companion
 
     companion object {
         /** Stores the library projects that are automatically added to the target ones */
         val libs = mutableListOf<String>()
     }
 
+    /**
+     * Hook that gets called after the project is ready no matter if settings or build script
+     */
     fun initialize() {
         prepareWorkspace()
         onInitialize()
     }
 
+    /**
+     * Override this to apply your extension's initialization steps
+     */
     open fun onInitialize() {
         // Override this for custom logic
     }
@@ -41,7 +53,7 @@ abstract class GradleExtension(protected val pending: Lazy<Project>) {
      * @internal
      */
     fun register(path: String, userConfiguration: Project.() -> Unit = {}) {
-        if(libs.isEmpty()) return configure(userConfiguration)
+        if (libs.isEmpty()) return configure(userConfiguration)
         project.gradle.settingsEvaluated { settings ->
             prepareWorkspace()
             settings.include(path)
@@ -71,28 +83,45 @@ abstract class GradleExtension(protected val pending: Lazy<Project>) {
         }
     }
 
+    /** @internal */
+    val mainClass by lazy {
+        listOfNotNull(
+            config("env.maven.group"),
+            config("project.name"),
+            config("env.maven.name").toTitlecase() + "Plugin"
+        ).joinToString(".")
+    }
+
+    /** @internal */
+    val mainFile: File? by lazy {
+        val classPath = mainClass.replace(".", File.separator)
+        val sourceSets = project.extensions.getByType(SourceSetContainer::class.java)
+        val mainSourceSet = sourceSets.getByName("main")
+
+        mainSourceSet.allSource.firstOrNull { file ->
+            file.absolutePath.endsWith("$classPath.kt") ||
+                file.absolutePath.endsWith("$classPath.java")
+        }
+    }
+
     private fun registerRepositories() {
         project.repositories.apply {
+            gradlePluginPortal()
             mavenCentral()
             mavenLocal()
         }
     }
-
-    private val config = BuildItExtension
 
     private fun applyToolchain() {
         with(project.pluginManager) {
             apply("java-library")
             apply("org.gradle.maven-publish")
             apply("org.gradle.signing")
-            if (config.kotlinLibrary.isNotBlank()) {
-                apply("org.jetbrains.kotlin")
-            }
         }
-        with(project.dependencies) {
-            if (config.kotlinLibrary.isNotBlank()) {
-                add("implementation", config.kotlinLibrary)
-            }
+        if (config.kotlinLibrary.isNotBlank()) {
+            log.lifecycle("> Plug :applyToolchain() <- useKotlin(${config.kotlinLibrary})")
+            project.pluginManager.apply("org.jetbrains.kotlin.jvm")
+            project.dependencies.add("implementation", config.kotlinLibrary)
         }
     }
 
@@ -110,18 +139,23 @@ abstract class GradleExtension(protected val pending: Lazy<Project>) {
                 test.java.setSrcDirs(listOf(config.testsDir))
             }
         }
-        project.plugins.findPlugin("org.jetbrains.kotlin.jvm")?.let {
-            with(project.extensions.getByType(KotlinJvmProjectExtension::class.java).sourceSets) {
-                named("main") { main ->
-                    main.resources.setSrcDirs(listOf(config.resourcesDir))
-                    main.kotlin.setSrcDirs(listOf(config.sourceDir))
+
+        if (project.plugins.hasPlugin("org.jetbrains.kotlin.jvm")) {
+            try {
+                with(project.extensions.getByType(KotlinJvmProjectExtension::class.java).sourceSets) {
+                    named("main") { main ->
+                        main.resources.setSrcDirs(listOf(config.resourcesDir))
+                        main.kotlin.setSrcDirs(listOf(config.sourceDir))
+                    }
+                    findByName("assets") ?: create("assets") { assets ->
+                        assets.resources.setSrcDirs(listOf(project.file(config.assetDir)))
+                    }
+                    named("test") { test ->
+                        test.kotlin.setSrcDirs(listOf(config.testsDir))
+                    }
                 }
-                findByName("assets") ?: create("assets") { assets ->
-                    assets.resources.setSrcDirs(listOf(project.file(config.assetDir)))
-                }
-                named("test") { test ->
-                    test.kotlin.setSrcDirs(listOf(config.testsDir))
-                }
+            } catch (e: NoClassDefFoundError) {
+                // Kotlin plugin API not available, skip Kotlin source set configuration
             }
         }
     }
@@ -154,4 +188,10 @@ abstract class GradleExtension(protected val pending: Lazy<Project>) {
             }
         }
     }
+
+    protected fun config(property: String, default: String = ""): String {
+        return project.providers.gradleProperty(property).getOrElse(default)
+    }
+
+    protected fun String.toTitlecase() = replaceFirstChar { it.uppercase() }
 }

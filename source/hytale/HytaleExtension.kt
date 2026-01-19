@@ -1,16 +1,23 @@
 package dev.buildit.gradle.hytale
 
+import dev.buildit.gradle.BuildItExtension
 import dev.buildit.gradle.GradleExtension
+import org.gradle.api.logging.Logger
+import org.gradle.api.logging.Logging
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.tasks.Copy
+import org.gradle.api.tasks.SourceSetContainer
+import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 
 /**
  * Creates an environment to build hytale mods
  */
 @Suppress("unused") // Used by Gradle, but that is not visible
 open class HytaleExtension(pending: Lazy<Project>) : GradleExtension(pending) {
+    private val log: Logger = Logging.getLogger(HytaleExtension::class.java)
+
     override fun onInitialize() {
         register("hytale") {
             validateHytaleInstallation()
@@ -19,6 +26,7 @@ open class HytaleExtension(pending: Lazy<Project>) : GradleExtension(pending) {
             libs.forEach {
                 project.dependencies.add("implementation", project.project(it))
             }
+            prepareWorkspace()
         }
     }
 
@@ -110,22 +118,64 @@ open class HytaleExtension(pending: Lazy<Project>) : GradleExtension(pending) {
         }
     }
 
-//    private fun prepareSource(target: Project, config: ProjectConfig) {
-//        val sourceSets = target.extensions.getByType(SourceSetContainer::class.java)
-//        val javaDir = sourceSets.getByName("main").java.srcDirs.first()
-//        val packagePath = config.mainClass.substringBeforeLast('.').replace('.', '/')
-//        val className = config.mainClass.substringAfterLast('.')
-//
-//        target.copy {
-//            it.from(target.resources.text.fromUri(javaClass.getResource("/hytale/java/HytalePlugin.tpl")))
-//            it.into(javaDir.resolve(packagePath))
-//            it.expand(
-//                mapOf(
-//                    "packageName" to config.mainClass.substringBeforeLast('.'),
-//                    "className" to className,
-//                ),
-//            )
-//            it.rename { "$className.java" }
-//        }
-//    }
+    private fun prepareWorkspace() {
+        when (BuildItExtension.kotlinLibrary) {
+            "org.jetbrains.kotlin:kotlin-stdlib" -> prepareKotlinWorkspace()
+            "" -> prepareJavaWorkspace()
+            else -> log.warn(
+                "Bootstrapping skipped, unsupported Kotlin library: ${BuildItExtension.kotlinLibrary}"
+            )
+        }
+    }
+
+    private val packagePath by lazy {
+        mainClass.substringBeforeLast('.').replace('.', '/')
+    }
+
+    private val className by lazy {
+        mainClass.substringAfterLast('.')
+    }
+
+    private fun prepareJavaWorkspace() {
+        val sourceSets = project.extensions.getByType(SourceSetContainer::class.java)
+        val javaDir = sourceSets.getByName("main").java.srcDirs.first()
+        project.copy {
+            it.from(
+                project.resources.text.fromUri(
+                    javaClass.getResource("/hytale/java/HytalePlugin.tpl")
+                )
+            )
+            it.into(javaDir.resolve(packagePath))
+            it.expand(
+                mapOf(
+                    "packageName" to mainClass.substringBeforeLast('.'),
+                    "className" to className,
+                ),
+            )
+            it.rename { "$className.java" }
+        }
+    }
+
+    private fun prepareKotlinWorkspace() {
+        if (!project.plugins.hasPlugin("org.jetbrains.kotlin.jvm")) return
+
+        val sourceSets =
+            project.extensions.getByType(KotlinJvmProjectExtension::class.java).sourceSets
+        val kotlinDir = sourceSets.getByName("main").kotlin.srcDirs.first()
+        project.copy {
+            it.from(
+                project.resources.text.fromUri(
+                    javaClass.getResource("/hytale/kotlin/HytalePlugin.tpl")
+                )
+            )
+            it.into(kotlinDir.resolve(packagePath))
+            it.expand(
+                mapOf(
+                    "packageName" to mainClass.substringBeforeLast('.'),
+                    "className" to className,
+                ),
+            )
+            it.rename { "$className.kt" }
+        }
+    }
 }

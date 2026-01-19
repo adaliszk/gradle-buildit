@@ -14,6 +14,10 @@ plugins {
     id("com.github.adaliszk.gradle-buildit")
 }
 
+buildit {
+    useKotlin()
+}
+
 hytale {
     includeAssetPack()
 }
