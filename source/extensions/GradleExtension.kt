@@ -1,10 +1,8 @@
-package dev.buildit.gradle
+package dev.buildit.gradle.extensions
 
+import dev.buildit.gradle.ProjectMetadata
 import org.gradle.api.Project
 import org.gradle.api.initialization.Settings
-import org.gradle.api.logging.Logger
-import org.gradle.api.logging.Logging
-import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.testing.Test
 import org.gradle.api.tasks.SourceSetContainer
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
@@ -13,15 +11,15 @@ import java.io.File
 
 /**
  * @internal
- * Shared base extension capabilities based on the Setting itself to register projects,
- * and auto-configure their:
+ * Shared base extension capabilities based on the Setting itself to register projects
+ * and autoconfigure their:
  * - plugin repositories
  * - maven repositories
  * - language dependencies
  * - source and resource paths
  * - tests tasks
  */
-abstract class GradleExtension(protected val settings: Settings) : GradleExtension
+abstract class GradleExtension(protected val settings: Settings)
 {
     companion object
     {
@@ -35,23 +33,13 @@ abstract class GradleExtension(protected val settings: Settings) : GradleExtensi
         settings.gradle.rootProject
     }
 
-    protected val plugin: SettingsExtension
-        get() = settings.extensions.getByType(SettingsExtension::class.java)
+    protected val plugin: BuilditExtension
+        get() = settings.extensions.getByType(BuilditExtension::class.java)
 
-    fun configureProject(target: Project)
+    open fun configureProject(target: Project)
     {
         if (target.subprojects.isNotEmpty()) return
         bootstrap(target)
-    }
-
-    open fun onConfigure(target: Project)
-    {
-        // Nothing to do here, but can be overridden!
-    }
-
-    open fun configureSettings()
-    {
-        // Nothing to do here, but can be overridden!
     }
 
     protected fun register(path: String, setupPreset: Project.() -> Unit = {})
@@ -74,7 +62,7 @@ abstract class GradleExtension(protected val settings: Settings) : GradleExtensi
             if (target.path == path)
             {
                 target.setupPreset()
-                bootstrap(target)
+                bootstrap(target, metadata)
             }
         }
     }
@@ -86,6 +74,11 @@ abstract class GradleExtension(protected val settings: Settings) : GradleExtensi
     }
 
     private fun bootstrap(target: Project)
+    {
+        bootstrap(target, ProjectMetadata.from(target))
+    }
+
+    private fun bootstrap(target: Project, metadata: ProjectMetadata)
     {
         metadata.update(target)
         target.repositories.apply {

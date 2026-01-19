@@ -6,7 +6,7 @@ import org.gradle.api.Project
 import org.gradle.api.initialization.Settings
 
 
-open class CommonPresets(settings: Settings) : SettingsExtension(settings)
+open class CommonExtension(settings: Settings) : GradleExtension(settings)
 {
     fun include(vararg projectPaths: String, userConfig: Project.() -> Unit = {})
     {

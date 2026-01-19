@@ -1,6 +1,6 @@
-package dev.buildit.gradle
+package dev.buildit.gradle.extensions
 
-open class SettingsExtension
+open class BuilditExtension
 {
     var sourceDir: String = "src/main/java"
     var resourcesDir: String = "src/main/resources"

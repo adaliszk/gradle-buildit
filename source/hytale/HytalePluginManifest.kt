@@ -3,8 +3,7 @@
 
 package dev.buildit.hytale
 
-import dev.buildit.gradle.ProjectMetadata
-import dev.buildit.gradle.ProjectSettings
+import dev.buildit.gradle.ProjectConfig
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.encodeToString
@@ -12,7 +11,6 @@ import kotlinx.serialization.json.*
 import org.gradle.api.Project
 import org.gradle.api.tasks.SourceSetContainer
 import java.io.File
-import kotlin.text.toBoolean
 
 
 @Serializable
@@ -59,7 +57,7 @@ data class HytalePluginManifest(
         fun from(project: Project): HytalePluginManifest
         {
             val file = findManifestFile(project)
-            val settings = ProjectSettings(project)
+            val settings = ProjectConfig(project)
 
             return buildManifest(file) {
                 HytalePluginManifest(
@@ -95,7 +93,7 @@ data class HytalePluginManifest(
         }
 
         private fun readAuthors(project: Project): List<Author> =
-            project.rootProject.file("authors.json")
+            project.rootProject.file("gradle.authors.json")
                 .takeIf { it.exists() }
                 ?.let { json.decodeFromString<List<Author>>(it.readText()) }
                 .orEmpty()

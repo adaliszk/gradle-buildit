@@ -1,24 +1,42 @@
-package dev.buildit.hytale
+package dev.buildit.gradle.hytale
 
-import dev.buildit.gradle.CraftableExtension
-import dev.buildit.gradle.GradleExtension
+import dev.buildit.gradle.ProjectConfig
 import dev.buildit.gradle.ProjectMetadata
+import dev.buildit.gradle.extensions.GradleExtension
+import dev.buildit.hytale.HytalePluginManifest
 import org.gradle.api.GradleException
 import org.gradle.api.Project
-import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.initialization.Settings
-import org.gradle.api.logging.Logger
-import org.gradle.api.logging.Logging
 import org.gradle.api.tasks.Copy
-import java.io.File
-import java.util.concurrent.atomic.AtomicBoolean
+import org.gradle.api.tasks.SourceSetContainer
 
 /**
  * Creates an environment to build hytale mods
  */
-open class HytaleProject(settings: Settings) : CraftableExtension(settings)
+open class HytaleProject(settings: Settings) : GradleExtension(settings)
 {
+    init
+    {
+        if (libs.isNotEmpty())
+        {
+            register("hytale", hytaleTarget()) {
+                libs.forEach {
+                    project.dependencies.add("implementation", project.project(it))
+                }
+            }
+        } else
+        {
+            settings.gradle.beforeProject { target ->
+                if (target.path == settings.rootProject.path)
+                {
+                    configureProject(settings.gradle.rootProject)
+                }
+            }
+
+        }
+    }
+
     var includeAssetPack: Boolean = true
 
     val patchline: String by lazy {
@@ -52,12 +70,6 @@ open class HytaleProject(settings: Settings) : CraftableExtension(settings)
         }
     }
 
-//    val serverRunDir by lazy {
-//        project.file("${project.projectDir}/devserver").apply {
-//            if (!exists()) mkdirs()
-//        }
-//    }
-
     val serverJar: String by lazy {
         val installed =
             project.file("$hytaleHome/install/$patchline/package/game/latest/Server/HytaleServer.jar")
@@ -73,37 +85,33 @@ open class HytaleProject(settings: Settings) : CraftableExtension(settings)
         // }
     }
 
-    override fun configureSettings()
-    {
-        settings.rootDir
-            .resolve("targets/hytale/devserver")
-            .mkdirs()
-
-        register(":targets:hytale", hytaleTarget()) {
-            libs.forEach {
-                project.dependencies.add(
-                    "implementation",
-                    project.project(it),
-                )
-            }
-        }
-    }
-
     private fun hytaleTarget() = ProjectMetadata(
-        packageName = settings.providers.gradleProperty("project.name").get(),
+        packageName = settings.providers.gradleProperty("project.name")
+            .getOrElse(project.name),
         type = ProjectMetadata.Type.HYTALE,
         options = mapOf(
             "includeAssetPack" to includeAssetPack,
-        )
+        ),
     )
 
-    override fun configure(target: Project)
-    {
-        // if (project.path !== target.path) return
 
+    override fun configureProject(target: Project)
+    {
+        if (project.path !== target.path) return
+
+        target.repositories.apply {
+            mavenCentral()
+            mavenLocal()
+        }
+        target.pluginManager.apply("java-library")
+
+        configureSourceSets(target)
         validateHytaleInstallation()
-        configureManifestTask(target)
         configureDependencies(target)
+        configureManifestTask(target)
+        configureKotlin(target)
+        configureTests(target)
+
         target.afterEvaluate {
             prepareWorkspace(target)
         }
@@ -121,6 +129,31 @@ open class HytaleProject(settings: Settings) : CraftableExtension(settings)
     private fun prepareWorkspace(target: Project)
     {
         HytalePluginManifest.from(target).update()
+
+        val config = ProjectConfig(target)
+        if(config.mainFile(config.mainClass, target) == null) {
+            prepareSource(target, config)
+        }
+    }
+
+    private fun prepareSource(target: Project, config: ProjectConfig)
+    {
+        val sourceSets = target.extensions.getByType(SourceSetContainer::class.java)
+        val javaDir = sourceSets.getByName("main").java.srcDirs.first()
+        val packagePath = config.mainClass.substringBeforeLast('.').replace('.', '/')
+        val className = config.mainClass.substringAfterLast('.')
+
+        target.copy {
+            it.from(target.resources.text.fromUri(javaClass.getResource("/hytale/java/HytalePlugin.tpl")))
+            it.into(javaDir.resolve(packagePath))
+            it.expand(
+                mapOf(
+                    "packageName" to config.mainClass.substringBeforeLast('.'),
+                    "className" to className,
+                ),
+            )
+            it.rename { "$className.java" }
+        }
     }
 
     private fun validateHytaleInstallation()
@@ -146,10 +179,10 @@ open class HytaleProject(settings: Settings) : CraftableExtension(settings)
 
     private fun configureManifestTask(target: Project)
     {
-        val updateManifest = target.tasks
-            .register("updatePluginManifest") { task ->
+        val updateManifest = target.tasks.findByName("updatePluginManifest")
+            ?: target.tasks.register("updatePluginManifest") { task ->
                 task.doFirst {
-                    HytalePluginManifest.from(target).update()
+                    HytalePluginManifest.Companion.from(target).update()
                 }
             }
 

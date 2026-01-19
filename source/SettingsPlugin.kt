@@ -1,6 +1,8 @@
 package dev.buildit.gradle
 
-import dev.buildit.hytale.HytaleProject
+import dev.buildit.gradle.extensions.CommonExtension
+import dev.buildit.gradle.extensions.BuilditExtension
+import dev.buildit.gradle.hytale.HytaleProject
 import org.gradle.api.Plugin
 import org.gradle.api.initialization.Settings
 
@@ -8,24 +10,23 @@ import org.gradle.api.initialization.Settings
 open class SettingsPlugin : Plugin<Settings>
 {
     protected open val extensions = mapOf(
-        "common" to CommonPresets::class.java,
+        "common" to CommonExtension::class.java,
         "hytale" to HytaleProject::class.java,
     )
 
     override fun apply(settings: Settings)
     {
-        settings.extensions.create("buildit", SettingsExtension::class.java)
+        settings.extensions.create("buildit", BuilditExtension::class.java)
 
         val registeredExtensions = extensions.mapValues {
             settings.extensions.create(it.key, it.value, settings)
         }
 
-        registeredExtensions.values.forEach(GradleExtension::configureSettings)
-        settings.gradle.projectsLoaded {
-            settings.gradle.rootProject.allprojects.forEach { project ->
-                registeredExtensions.values.forEach { extension ->
-                    extension.configureProject(project)
-                }
+        with(settings.gradle) {
+            projectsLoaded {
+                registeredExtensions.values
+                    .flatMap { extension -> rootProject.allprojects.map { extension to it } }
+                    .forEach { (extension, project) -> extension.configureProject(project) }
             }
         }
     }

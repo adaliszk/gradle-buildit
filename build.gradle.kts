@@ -31,8 +31,8 @@ publishing {
 
 sourceSets {
     main {
-        kotlin.setSrcDirs(listOf("src"))
-        java.setSrcDirs(listOf("src"))
+        kotlin.setSrcDirs(listOf("source"))
+        java.setSrcDirs(listOf("source"))
         resources.setSrcDirs(listOf("resources"))
     }
     test {

@@ -4,7 +4,7 @@ import org.gradle.api.Project
 import org.gradle.api.tasks.SourceSetContainer
 import java.io.File
 
-class ProjectSettings(private val project: Project)
+class ProjectConfig(project: Project)
 {
     val meta = ProjectMetadata.from(project)
 

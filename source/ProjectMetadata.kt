@@ -24,7 +24,7 @@ data class ProjectMetadata(
             with(project.extensions.extraProperties) {
                 return ProjectMetadata(
                     type = properties["type"] as? Type ?: Type.UNKNOWN,
-                    packageName = properties["packageName"] as String,
+                    packageName = properties["packageName"] as? String ?: project.name,
                 )
             }
         }
