@@ -1,23 +1,26 @@
+rootProject.name = "example.kotlin"
+
 pluginManagement {
-    includeBuild("../..") // <- Simulating JetPack
     plugins {
+        id("dev.scaffoldit") version "0.1.5-dev"
         id("com.gradleup.shadow") version "9.3.1"
     }
     repositories {
+        mavenLocal()
         gradlePluginPortal()
         mavenCentral()
-        mavenLocal()
     }
 }
 
 plugins {
-    id("com.github.adaliszk.gradle-buildit")
-}
-
-buildit {
-    useKotlin()
+    id("dev.scaffoldit")
 }
 
 hytale {
-    includeAssetPack()
+    useKotlin()
+    manifest {
+        Group = "ScaffoldIt"
+        Name = "Example"
+        Main = "dev.scaffoldit.example.KotlinExample"
+    }
 }

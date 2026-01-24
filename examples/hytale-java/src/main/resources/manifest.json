@@ -3,6 +3,7 @@
     "Name": "Example",
     "Version": "0.0.0",
     "Description": "Fantastic mod, beautiful mechanics... people are saying it's amazing.",
+    "Authors": [],
     "DisabledByDefault": false,
     "IncludesAssetPack": true,
     "ServerVersion": "*",

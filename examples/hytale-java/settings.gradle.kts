@@ -3,10 +3,11 @@ rootProject.name = "example.java"
 pluginManagement {
     // includeBuild("../..") // <- Simulating JetPack
     plugins {
-        id("dev.scaffoldit") version "0.1.4-dev"
+        id("dev.scaffoldit") version "0.1.5-dev"
         id("com.gradleup.shadow") version "9.3.1"
     }
     repositories {
+        mavenLocal()
         gradlePluginPortal()
         mavenCentral()
     }
