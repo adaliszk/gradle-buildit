@@ -1,25 +1,32 @@
 > [!WARNING]  
 > In active development and experimentation, almost nothing is stable!
 
-# BuildIt! Gradle Plugin for Mod Development
+# ScaffoldIt! Gradle Plugin for Mod Development
 
-The philosophy here is to keep the necessary boilerplate at the absolute minimum while also
-providing a robust and flexible framework for mod development for Hytale, _later to Minecraft._
+Keep the necessary boilerplate at the absolute minimum while also having access to a robust and
+flexible framework for mod development for Hytale, _later for Minecraft._
 
 ### Features
 
-- Automatic server dependency resolution and manifest generation
-- Minimal boilerplate where you have access to `hytale` block in both settings and build scripts
-- Monorepo support through the usage via `include` within the `common` configuration block
-- Kotlin support by using `useKotlin()` in the `buildit` configuration block
+<!-- - Automatic scaffolding based on settings and annotations -->
+
+- Monorepo support through common "multiloader" and "library" patterns
+
+<!-- - Mixed Kotlin and Java projects with automatic dependencies -->
+<!-- - Source provider for decompiling or using platforms such as Hytale -->
+
+- Delegation-based wiring for cross-platform mod development
+- Hot-swapping code and resources, including live reloading
+
+<!-- - IDEA linter with compiler errors for fast feedback -->
 
 _and more coming soon:tm:_
 
 ### Requirements
 
-- IntelliJ IDEA (even Community edition)
-- Java 25, preferably JetBrains downloaded and set as default
-- Hytale installed through the launcher
+- IntelliJ IDEA (even Community edition), VS Code, or any other editor
+- Java 25, use JetBrains Runtime (JBR) for hot swapping to work!
+- Hytale installed through the launcher when used as the target
 
 ## Usage
 
@@ -28,67 +35,59 @@ _and more coming soon:tm:_
 rootProject.name = "dev.example"
 pluginManagement {
     plugins {
-        id("com.github.adaliszk.gradle-buildit") version "dev-snapshot"
+        id("com.github.adaliszk.gradle-scaffoldit-modkit") version "dev-snapshot"
         id("com.gradleup.shadow") version "9.3.1"
     }
     repositories {
-        gradlePluginPortal()
         maven("https://jitpack.io")
+        gradlePluginPortal()
     }
 }
 plugins {
-    id("com.github.adaliszk.gradle-buildit")
+    id("com.github.adaliszk.gradle-scaffoldit-modkit")
 }
 hytale {
-    includeAssetPack()
+    manifest {
+        Group = "Example"
+        IncludeAssetPack = true
+    }
 }
 ```
 
-### Hytale {}
+### `hytale { }`
 
-Resolves either the root or the hytale folder for your mod development, where it automatically
-detects which one by seeing if you used the `common { include() }` before. It automatically creates
-the necessary folder structure and even creates an example main class for you.
+Configures a hytale project with dependencies, manifest management, and inherits common packages
+when they are declared. <!-- It automatically creates the necessary folder structure and even 
+creates an example main class for you. -->
 
 Options:
 
-- `includeAssetPack(Boolean)`: Whether to include the asset pack via the manifest (default: true)
+- `useKotlin(dependencyString)`: Use and specify the Kotlin STDLib for compilation.
+- `useFlat()`: Switch the directory layout to flat that drops `main/com/example/project`.
+- `manifest {}`: Configure plugin manifest details by their values.
 
-### Common {}
+### `common { }`
 
 Collects and configures common library packages and adds them to the target projects as
-dependencies, similarly to `hytale` it automatically creates the necessary folder structure, but
-will leave the main class up to you.
+dependencies. <!-- Similarly to `hytale` it automatically creates the necessary folder structure,
+but will leave the main class up to you. -->
 
 Options:
 
-- `include(...Strings) { }`: Include the specified package directory in the common configuration.
-- `useKotlin(dependencyNotation)`: Enable kotlin support only for the common projects.
+- `useKotlin(dependencyString)`: Use and specify the Kotlin STDLib for compilation.
+- `useFlat()`: Switch the directory layout to flat that drops `main/com/example/project`.
+- `include(...Strings) { }`: Include sub-package directory in the common configuration.
 
-### BuildIt {}
+### Hot Swapping
 
-Defaults for all the configuration blocks and templates, mainly to support multiple
+To enable dynamic class reloading at runtime, you MUST use a JetBrains JRE, which is available for
+free at https://github.com/JetBrains/JetBrainsRuntime, or you can manage it within the IDEA SDK
+window. Once configured, update your run configuraitons to use it and watch for the Gradle widget
+in your code section's top right corner.
 
-Options:
-
-- `useKotlin(dependencyNotation)`: Enable kotlin support only for the buildit projects.
-- `useFlat()`: Turn on flat project structure where `main/java/dev/example` is dropped.
-- `sourceDir = "String"`: The source directory relative from the project path.
-- `resourceDir = "String"`: The resource directory relative from the project path.
-- `testDir = "String"`: The test directory relative from the project path.
-- `commonDir = "String"`: Global common path relative from the root project.
-- `assetDir = "String"`: Global asset directory relative from the root project.
+<!-- The plugin also adds its own runtime agent to reload your mod where that is possible. -->
 
 ## Contributions
 
 Feel free to open issues or pull requests if you have some problems, you can also reach out to me
 on discord under the nickname of `kicsivazz`.
-
-Current plan:
-
-- IDEA run configuration generator
-- Bootstrap devserver with a superflat testing world
-- Examples for Kotlin, Monorepo Java, Monorepo Kotlin, Monorepo Mixed
-- Bootstrap tests with a boilerplate
-- Proof of Concept for Kotlin Annotation-based wiring
-- Auto hot-swapping instead of manual IDEA button usage
