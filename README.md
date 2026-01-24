@@ -9,18 +9,14 @@ flexible framework for mod development for Hytale, _later for Minecraft._
 ### Features
 
 <!-- - Automatic scaffolding based on settings and annotations -->
-
 - Monorepo support through common "multiloader" and "library" patterns
-
-<!-- - Mixed Kotlin and Java projects with automatic dependencies -->
+- Mixed Kotlin and Java projects with automatic dependencies
 <!-- - Source provider for decompiling or using platforms such as Hytale -->
-
 - Delegation-based wiring for cross-platform mod development
 - Hot-swapping code and resources, including live reloading
-
 <!-- - IDEA linter with compiler errors for fast feedback -->
 
-_and more coming soon:tm:_
+_and more coming soon_
 
 ### Requirements
 

@@ -13,5 +13,5 @@ pluginManagement {
     }
 }
 
-includeBuild("gradle")
-include(":devtools:hytale")
+includeBuild("plugin")
+include(":hytale")
