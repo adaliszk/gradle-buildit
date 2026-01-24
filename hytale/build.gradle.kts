@@ -1,3 +1,6 @@
+extra["packageName"] = "ScaffoldIt Hytale Gradle"
+description = "Registers project and setting extensions for hytale Gradle scopes where the actual mods are implemented."
+
 plugins {
     kotlin("jvm") version "2.3.0"
     id("org.jetbrains.gradle.plugin.idea-ext") version "1.3"

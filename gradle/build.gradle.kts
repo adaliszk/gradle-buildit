@@ -1,3 +1,6 @@
+extra["packageName"] = "ScaffoldIt Gradle"
+description = "Wires Gradle tasks and the plugin with ScaffoldIt."
+
 plugins {
     kotlin("jvm") version "2.3.0"
     kotlin("plugin.serialization") version "2.3.0"

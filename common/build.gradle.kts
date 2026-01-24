@@ -1,3 +1,6 @@
+extra["packageName"] = "ScaffoldIt Common Gradle"
+description = "Registers project and setting extensions for common Gradle scopes where libraries of mods live."
+
 plugins {
     kotlin("jvm") version "2.3.0"
 }

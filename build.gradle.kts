@@ -8,7 +8,46 @@ plugins {
 
 allprojects {
     group = "dev.scaffoldit"
-    version = "0.1.2-dev"
+    version = "0.1.3-dev"
+}
+
+subprojects {
+    apply(plugin = "com.vanniktech.maven.publish")
+
+    afterEvaluate {
+        val pkgName = project.extra["packageName"] as String? ?: project.name
+        val pkgDesc = project.description ?: project.name
+        mavenPublishing {
+            publishToMavenCentral()
+            signAllPublications()
+            pom {
+                name.set(pkgName)
+                description.set(pkgDesc)
+                url.set("https://github.com/adaliszk/scaffoldit")
+
+                licenses {
+                    license {
+                        name.set("BSD-3-Clause")
+                        url.set("https://github.com/adaliszk/gradle-scaffoldit-modkit/blob/dev/LICENSE.md")
+                    }
+                }
+
+                developers {
+                    developer {
+                        id.set("adaliszk")
+                        name.set("Ádám \"Kicsivazz\" Liszkai")
+                        url.set("https://github.com/adaliszk")
+                    }
+                }
+
+                scm {
+                    url.set("https://github.com/adaliszk/scaffoldit")
+                    connection.set("scm:git:git://github.com/adaliszk/scaffoldit.git")
+                    developerConnection.set("scm:git:ssh://git@github.com/adaliszk/scaffoldit.git")
+                }
+            }
+        }
+    }
 }
 
 repositories {
@@ -27,7 +66,7 @@ dependencies {
 gradlePlugin {
     plugins {
         register("mavenCentral") {
-            id = "dev.scaffoldit.modkit"
+            id = "dev.scaffoldit"
             implementationClass = "dev.scaffoldit.GradlePlugin"
         }
     }
@@ -36,10 +75,9 @@ gradlePlugin {
 mavenPublishing {
     publishToMavenCentral()
     signAllPublications()
-
     pom {
         name.set("ScaffoldIt")
-        description.set("Gradle plugin for cross-platform game mod development")
+        description.set("Gradle plugin and framework for cross-platform game mod development")
         url.set("https://github.com/adaliszk/scaffoldit")
 
         licenses {

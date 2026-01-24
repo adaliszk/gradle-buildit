@@ -9,11 +9,12 @@ flexible framework for mod development for Hytale, _later for Minecraft._
 ### Features
 
 <!-- - Automatic scaffolding based on settings and annotations -->
+- Hytale server dependencies using the official hytale maven
 - Monorepo support through common "multiloader" and "library" patterns
 - Mixed Kotlin and Java projects with automatic dependencies
-<!-- - Source provider for decompiling or using platforms such as Hytale -->
 - Delegation-based wiring for cross-platform mod development
 - Hot-swapping code and resources, including live reloading
+<!-- - Source provider for decompiling or using platforms such as Hytale -->
 <!-- - IDEA linter with compiler errors for fast feedback -->
 
 _and more coming soon_
@@ -31,7 +32,7 @@ _and more coming soon_
 rootProject.name = "dev.example"
 pluginManagement {
     plugins {
-        id("dev.scaffoldit.modkit") version "0.1.1-dev"
+        id("dev.scaffoldit") version "0.1.3-dev"
         id("com.gradleup.shadow") version "9.3.1"
     }
     repositories {
@@ -39,7 +40,7 @@ pluginManagement {
     }
 }
 plugins {
-    id("dev.scaffoldit.modkit")
+    id("dev.scaffoldit")
 }
 hytale {
     manifest {
