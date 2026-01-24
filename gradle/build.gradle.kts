@@ -4,9 +4,6 @@ plugins {
     id("org.jetbrains.gradle.plugin.idea-ext") version "1.3"
 }
 
-project.group = "dev.scaffoldit.gradle"
-project.version = System.getenv("GITHUB_REF_NAME") ?: "0.0.0-dev"
-
 repositories {
     gradlePluginPortal()
     mavenCentral()

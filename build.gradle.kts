@@ -6,8 +6,10 @@ plugins {
     `java-gradle-plugin`
 }
 
-group = "dev.scaffoldit"
-version = System.getenv("GITHUB_REF_NAME") ?: "0.1.1-dev"
+allprojects {
+    group = "dev.scaffoldit"
+    version = "0.1.2-dev"
+}
 
 repositories {
     gradlePluginPortal()

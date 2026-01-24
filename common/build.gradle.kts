@@ -2,9 +2,6 @@ plugins {
     kotlin("jvm") version "2.3.0"
 }
 
-project.group = "dev.scaffoldit.common"
-project.version = System.getenv("GITHUB_REF_NAME") ?: "0.0.0-dev"
-
 repositories {
     gradlePluginPortal()
     mavenCentral()

@@ -4,9 +4,6 @@ plugins {
     kotlin("plugin.serialization")
 }
 
-project.group = "dev.scaffoldit.hytale"
-project.version = System.getenv("GITHUB_REF_NAME") ?: "0.0.0-dev"
-
 repositories {
     gradlePluginPortal()
     mavenCentral()
