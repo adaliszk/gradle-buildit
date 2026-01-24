@@ -1,23 +1,18 @@
-> [!WARNING]  
-> In active development and experimentation, almost nothing is stable!
-
-# ScaffoldIt! Gradle Plugin for Mod Development
+# ScaffoldIt! Gradle Plugin
 
 Keep the necessary boilerplate at the absolute minimum while also having access to a robust and
 flexible framework for mod development for Hytale, _later for Minecraft._
 
 ### Features
 
-<!-- - Automatic scaffolding based on settings and annotations -->
 - Hytale server dependencies using the official hytale maven
 - Monorepo support through common "multiloader" and "library" patterns
 - Mixed Kotlin and Java projects with automatic dependencies
 - Delegation-based wiring for cross-platform mod development
 - Hot-swapping code and resources, including live reloading
+
 <!-- - Source provider for decompiling or using platforms such as Hytale -->
 <!-- - IDEA linter with compiler errors for fast feedback -->
-
-_and more coming soon_
 
 ### Requirements
 
@@ -25,7 +20,7 @@ _and more coming soon_
 - Java 25, use JetBrains Runtime (JBR) for hot swapping to work!
 - Hytale installed through the launcher when used as the target
 
-## Usage
+### Usage
 
 ```kotlin
 // settings.gradle.kts
@@ -33,7 +28,6 @@ rootProject.name = "dev.example"
 pluginManagement {
     plugins {
         id("dev.scaffoldit") version "0.1.5-dev"
-        id("com.gradleup.shadow") version "9.3.1"
     }
     repositories {
         gradlePluginPortal()
@@ -62,6 +56,7 @@ creates an example main class for you. -->
 
 Options:
 
+<!-- - `include(...Strings) { }`: Include sub-package directory in the common configuration. -->
 - `useKotlin(dependencyString)`: Use and specify the Kotlin STDLib for compilation.
 - `useFlat()`: Switch the directory layout to flat that drops `main/com/example/project`.
 - `manifest {}`: Configure plugin manifest details by their values.
@@ -74,9 +69,9 @@ but will leave the main class up to you. -->
 
 Options:
 
+- `include(...Strings) { }`: Include sub-package directory in the common configuration.
 - `useKotlin(dependencyString)`: Use and specify the Kotlin STDLib for compilation.
 - `useFlat()`: Switch the directory layout to flat that drops `main/com/example/project`.
-- `include(...Strings) { }`: Include sub-package directory in the common configuration.
 
 ### Hot Swapping
 
@@ -85,9 +80,36 @@ free at https://github.com/JetBrains/JetBrainsRuntime, or you can manage it with
 window. Once configured, update your run configuraitons to use it and watch for the Gradle widget
 in your code section's top right corner.
 
-<!-- The plugin also adds its own runtime agent to reload your mod where that is possible. -->
+There is also an Agent Plugin that at runtime detects the Hot Swapping and reloads plugins
+automatically for you; with that you only need to click on "Code Changed" in the editor UI.
 
-## Contributions
+# ScaffoldIt! Modding API
+
+> [!WARNING]  
+> The Modding API is in active development, subject to change, and may have missing features!
+
+To streamline delivering code, a tiny micro-framework is provided to _wire_ components using Kotlin
+delegation. With it, you can write modular code that hides the low-level details for the most common
+tasks but still exposes enough power to ship anything custom.
+
+```kotlin
+dependencies {
+    implementation("dev.scaffoldit:api:0.1.5-dev")
+}
+```
+
+```kotlin
+// Instrument mod entrypoint
+class ExamplePlugin(init: JavaPluginInit) : JavaPlugin(init),
+    Wired by ScaffoldIt.Scoped()
+
+// Auto-register a feature
+class ExampleCommand : CommandBase,
+    Wired.Command by Hytale.Command()
+    Wired by ScaffoldIt.Scoped()
+``` 
+
+# Contributions
 
 Feel free to open issues or pull requests if you have some problems, you can also reach out to me
 on discord under the nickname of `kicsivazz`.
