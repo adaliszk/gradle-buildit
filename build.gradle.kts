@@ -1,14 +1,12 @@
 plugins {
     kotlin("jvm") version "2.3.0"
-    kotlin("plugin.serialization") version "2.3.0"
-    id("org.jetbrains.gradle.plugin.idea-ext") version "1.3"
     id("com.vanniktech.maven.publish") version "0.36.0"
     `java-gradle-plugin`
 }
 
 allprojects {
     group = "dev.scaffoldit"
-    version = "0.1.3-dev"
+    version = "0.1.4-dev"
 }
 
 subprojects {

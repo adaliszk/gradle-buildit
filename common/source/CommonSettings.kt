@@ -30,12 +30,16 @@ open class CommonSettings(protected val settings: Settings) :
     init {
         wire(this)
         log.lifecycle("> Plug :common:initialize()")
-        include(":$projectDir")
-        settings.gradle.projectsLoaded { gradle ->
-            val project = gradle.rootProject.project(":$projectDir")
-            with(ToolchainManager::class).configure(project)
-            with(SourceManager::class).configure(project)
-            log.lifecycle("> Plug :common:initialize():done")
+        settings.gradle.settingsEvaluated {
+            if (settings.rootDir.resolve(projectDir).exists()) {
+                settings.include(":$projectDir")
+                settings.gradle.projectsLoaded { gradle ->
+                    val project = gradle.rootProject.project(":$projectDir")
+                    with(ToolchainManager::class).configure(project)
+                    with(SourceManager::class).configure(project)
+                    log.lifecycle("> Plug :common:initialize()")
+                }
+            }
         }
     }
 }

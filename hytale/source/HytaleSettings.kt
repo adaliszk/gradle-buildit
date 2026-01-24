@@ -20,32 +20,35 @@ open class HytaleSettings(protected val settings: Settings) :
     Gradle.ConfigureToolchain by ToolchainManager(),
     Gradle.ConfigurePaths by SourceManager(),
     Gradle.ConfigureTests by TestingEngine(),
-    Gradle.ConfigurePlatform by HytaleServerPlugin(),
+    Gradle.ConfigurePlatform by HytaleServerPlatform(),
+    Gradle.ConfigureIdeaDev by HytaleDevserverRun(),
     Wired by ScaffoldIt() {
 
     private val log: Logger = Logging.getLogger(this::class.java)
 
-    override var projectDir: String = "common"
+    override var projectDir: String = ""
 
     init {
         wire(this)
         log.lifecycle("> Plug :hytale(settings):initialize()")
-        include(":$projectDir")
         settings.gradle.projectsLoaded { gradle ->
             val project = gradle.rootProject.project(":$projectDir")
             with(ToolchainManager::class).configure(project)
             with(SourceManager::class).configure(project)
             with(TestingEngine::class).configure(project)
-            with(HytaleServerPlugin::class).configure(project)
-            log.lifecycle("> Plug :hytale(settings):initialize():done")
+            with(HytaleServerPlatform::class).configure(project)
+            with(HytaleDevserverRun::class).configure(project)
+            log.lifecycle("> Plug :hytale(settings):initialize():projectsLoaded")
         }
     }
 
     fun manifest(config: HytaleManifest.() -> Unit) {
+        log.lifecycle("> Plug :hytale(settings):manifest()")
         settings.gradle.projectsLoaded { gradle ->
             val project = gradle.rootProject.project(":$projectDir")
             HytaleManifest.from(project).apply(config).configure(project)
             HytaleManifest.from(project).saveTo(project)
+            log.lifecycle("> Plug :hytale(settings):manifest():projectsLoaded")
         }
     }
 }

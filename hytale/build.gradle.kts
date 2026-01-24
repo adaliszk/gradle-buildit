@@ -3,8 +3,9 @@ description = "Registers project and setting extensions for hytale Gradle scopes
 
 plugins {
     kotlin("jvm") version "2.3.0"
-    id("org.jetbrains.gradle.plugin.idea-ext") version "1.3"
-    kotlin("plugin.serialization")
+    kotlin("plugin.serialization") version "2.3.0"
+    id("org.jetbrains.gradle.plugin.idea-ext") version "1.3" apply false
+    id("com.gradleup.shadow") version "9.3.1"
 }
 
 repositories {
@@ -28,6 +29,11 @@ dependencies {
     // Monorepo
     implementation(project(":api"))
     implementation(project(":gradle"))
+}
+
+tasks.shadowJar {
+    archiveClassifier.set("")
+    relocate("org.jetbrains.gradle.plugin.idea", "dev.scaffoldit.shaded.idea")
 }
 
 sourceSets {

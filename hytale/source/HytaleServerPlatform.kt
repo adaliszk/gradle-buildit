@@ -7,7 +7,7 @@ import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.gradle.api.tasks.Copy
 
-class HytaleServerPlugin : Gradle.ConfigurePlatform {
+class HytaleServerPlatform : Gradle.ConfigurePlatform {
     private val log: Logger = Logging.getLogger(this::class.java)
 
     fun configure(project: Project): Gradle.ConfigurePlatform {
@@ -21,6 +21,7 @@ class HytaleServerPlugin : Gradle.ConfigurePlatform {
 
         with(project.dependencies) {
             add("compileOnly", "com.hypixel.hytale:Server:+")
+            add("runtimeOnly", "com.hypixel.hytale:Server:+")
             // add("compileOnly", project.files(config.serverFilePath))
         }
 

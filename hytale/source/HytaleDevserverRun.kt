@@ -27,7 +27,7 @@ class HytaleDevserverRun : Gradle.ConfigureIdeaDev {
 
         val serverRunDir = project.file("devserver")
         if (serverRunDir.mkdirs()) {
-            javaClass.getResourceAsStream("/hytale/server.zip")?.use { stream ->
+            javaClass.getResourceAsStream("/server.zip")?.use { stream ->
                 project.zipTree(project.file("temp.zip").apply { writeBytes(stream.readBytes()) })
                     .let { tree -> project.copy { it.from(tree); it.into(serverRunDir) } }
                     .also { project.delete("temp.zip") }

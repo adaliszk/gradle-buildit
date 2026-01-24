@@ -19,7 +19,7 @@ open class HytaleProject(private val project: Project) :
     Gradle.ConfigureToolchain by ToolchainManager(),
     Gradle.ConfigurePaths by SourceManager(),
     Gradle.ConfigureTests by TestingEngine(),
-    Gradle.ConfigurePlatform by HytaleServerPlugin(),
+    Gradle.ConfigurePlatform by HytaleServerPlatform(),
     Gradle.ConfigureIdeaDev by HytaleDevserverRun(),
     Wired by ScaffoldIt() {
 
@@ -27,15 +27,16 @@ open class HytaleProject(private val project: Project) :
 
     init {
         wire(this)
+        log.lifecycle("> Plug :hytale(project):initialize()")
         with(ToolchainManager::class).configure(project)
         with(SourceManager::class).configure(project)
         with(TestingEngine::class).configure(project)
-        with(HytaleServerPlugin::class).configure(project)
+        with(HytaleServerPlatform::class).configure(project)
         with(HytaleDevserverRun::class).configure(project)
-        log.lifecycle("> Plug :hytale(project):initialized")
     }
 
     fun manifest(config: HytaleManifest.() -> Unit) {
+        log.lifecycle("> Plug :hytale(project):manifest()")
         HytaleManifest.from(project).apply(config).configure(project)
         HytaleManifest.from(project).saveTo(project)
     }

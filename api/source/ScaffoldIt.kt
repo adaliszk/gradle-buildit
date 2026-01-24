@@ -3,6 +3,7 @@ package dev.scaffoldit.api
 import kotlin.reflect.KClass
 import kotlin.reflect.full.allSuperclasses
 import kotlin.reflect.full.allSupertypes
+import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.memberProperties
 
 class ScaffoldIt : Wired {
@@ -15,9 +16,7 @@ class ScaffoldIt : Wired {
     override fun <T : Trait> with(cls: KClass<T>): T {
         val traitInterface = cls.allSuperclasses
             .plus(cls.allSupertypes.mapNotNull { it.classifier as? KClass<*> })
-            .firstOrNull {
-                it.qualifiedName?.contains("Trait") == true
-            }
+            .firstOrNull { it.isSubclassOf(Trait::class) }
         val propertyName = "_wired${traitInterface?.simpleName ?: cls.simpleName}"
         val property = this.parent::class.memberProperties.find { it.name.endsWith(propertyName) }
             ?: error("No delegated property $propertyName found")
