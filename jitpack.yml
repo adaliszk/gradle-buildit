@@ -1,6 +1,0 @@
-install:
-  - curl -O https://downloads.gradle.org/distributions/gradle-9.2.0-bin.zip
-  - unzip -q gradle-9.2.0-bin.zip
-  - ./gradle-9.2.0/bin/gradle publishToMavenLocal
-jdk:
-  - openjdk25

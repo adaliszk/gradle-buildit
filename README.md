@@ -31,20 +31,20 @@ _and more coming soon_
 rootProject.name = "dev.example"
 pluginManagement {
     plugins {
-        id("com.github.adaliszk.gradle-scaffoldit-modkit") version "dev-snapshot"
+        id("dev.scaffoldit.modkit") version "0.1.1-dev"
         id("com.gradleup.shadow") version "9.3.1"
     }
     repositories {
-        maven("https://jitpack.io")
-        gradlePluginPortal()
+        mavenCentral()
     }
 }
 plugins {
-    id("com.github.adaliszk.gradle-scaffoldit-modkit")
+    id("dev.scaffoldit.modkit")
 }
 hytale {
     manifest {
-        Group = "Example"
+        Group = "ScaffoldIt"
+        Name = "Example"
         IncludeAssetPack = true
     }
 }

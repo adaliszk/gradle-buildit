@@ -2,12 +2,12 @@ plugins {
     kotlin("jvm") version "2.3.0"
     kotlin("plugin.serialization") version "2.3.0"
     id("org.jetbrains.gradle.plugin.idea-ext") version "1.3"
+    id("com.vanniktech.maven.publish") version "0.36.0"
     `java-gradle-plugin`
-    `maven-publish`
 }
 
-project.group = "dev.scaffoldit"
-project.version = System.getenv("GITHUB_REF_NAME") ?: "0.0.0-dev"
+group = "dev.scaffoldit"
+version = System.getenv("GITHUB_REF_NAME") ?: "0.1.1-dev"
 
 repositories {
     gradlePluginPortal()
@@ -22,22 +22,46 @@ dependencies {
     implementation(project(":hytale"))
 }
 
-//gradlePlugin {
-//    plugins {
-//        register("plugin") {
-//            id = "com.github.adaliszk.gradle-scaffoldit-modkit"
-//            implementationClass = "dev.scaffoldit.GradlePlugin"
-//        }
-//    }
-//}
-//
-//publishing {
-//    publications {
-//        create<MavenPublication>("maven") {
-//            from(components["java"])
-//        }
-//    }
-//}
+gradlePlugin {
+    plugins {
+        register("mavenCentral") {
+            id = "dev.scaffoldit.modkit"
+            implementationClass = "dev.scaffoldit.GradlePlugin"
+        }
+    }
+}
+
+mavenPublishing {
+    publishToMavenCentral()
+    signAllPublications()
+
+    pom {
+        name.set("ScaffoldIt")
+        description.set("Gradle plugin for cross-platform game mod development")
+        url.set("https://github.com/adaliszk/scaffoldit")
+
+        licenses {
+            license {
+                name.set("BSD-3-Clause")
+                url.set("https://github.com/adaliszk/gradle-scaffoldit-modkit/blob/dev/LICENSE.md")
+            }
+        }
+
+        developers {
+            developer {
+                id.set("adaliszk")
+                name.set("Ádám \"Kicsivazz\" Liszkai")
+                url.set("https://github.com/adaliszk")
+            }
+        }
+
+        scm {
+            url.set("https://github.com/adaliszk/scaffoldit")
+            connection.set("scm:git:git://github.com/adaliszk/scaffoldit.git")
+            developerConnection.set("scm:git:ssh://git@github.com/adaliszk/scaffoldit.git")
+        }
+    }
+}
 
 sourceSets {
     main {
