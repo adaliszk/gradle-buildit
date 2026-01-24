@@ -19,7 +19,7 @@ class ToolchainManager : Gradle.ConfigureToolchain {
     override fun useKotlin(dependencyNotation: String?) {
         log.lifecycle("> Set $cls:useKotlin($dependencyNotation)")
         kotlin = dependencyNotation ?: "org.jetbrains.kotlin:kotlin-stdlib"
-        configure(project)
+        if (::project.isInitialized) configure(project)
     }
 
     fun configure(project: Project): ToolchainManager {

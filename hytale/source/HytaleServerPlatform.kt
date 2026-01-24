@@ -1,5 +1,6 @@
 package dev.scaffoldit.hytale
 
+import dev.scaffoldit.api.ScaffoldIt
 import dev.scaffoldit.gradle.Gradle
 import org.gradle.api.Project
 import org.gradle.api.file.DuplicatesStrategy
@@ -22,7 +23,10 @@ class HytaleServerPlatform : Gradle.ConfigurePlatform {
         with(project.dependencies) {
             add("compileOnly", "com.hypixel.hytale:Server:+")
             add("runtimeOnly", "com.hypixel.hytale:Server:+")
-            // add("compileOnly", project.files(config.serverFilePath))
+            add(
+                "runtimeOnly",
+                "dev.scaffoldit:devtools:${ScaffoldIt.VERSION}"
+            )
         }
 
         with(project.tasks) {

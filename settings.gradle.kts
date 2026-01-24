@@ -15,5 +15,6 @@ pluginManagement {
 
 include("api")
 include("gradle")
+include("devtools")
 include("common")
 include("hytale")

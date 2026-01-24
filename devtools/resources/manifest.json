@@ -1,12 +1,12 @@
 {
     "Group": "ScaffoldIt",
     "Name": "Devtools",
-    "Version": "0.0.0",
+    "Version": "0.1.5",
     "Authors": [
         {"Name": "Kicsivazz", "Email": "scaffoldit@adaliszk.dev", "Website": "https://scaffoldit.dev"}
     ],
     "DisabledByDefault": false,
     "IncludesAssetPack": false,
     "ServerVersion": "*",
-    "Main": "dev.scaffoldit.hytale.HytaleDevtoolsPlugin"
+    "Main": "dev.scaffoldit.devtools.HytaleDevtoolsPlugin"
 }

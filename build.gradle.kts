@@ -6,7 +6,7 @@ plugins {
 
 allprojects {
     group = "dev.scaffoldit"
-    version = "0.1.4-dev"
+    version = "0.1.5-dev"
 }
 
 subprojects {
@@ -17,7 +17,9 @@ subprojects {
         val pkgDesc = project.description ?: project.name
         mavenPublishing {
             publishToMavenCentral()
-            signAllPublications()
+            if (project.findProperty("signing.keyId") != null) {
+                signAllPublications()
+            }
             pom {
                 name.set(pkgName)
                 description.set(pkgDesc)
@@ -33,7 +35,7 @@ subprojects {
                 developers {
                     developer {
                         id.set("adaliszk")
-                        name.set("Ádám \"Kicsivazz\" Liszkai")
+                        name.set("\"Kicsivazz\" Ádán Liszkai")
                         url.set("https://github.com/adaliszk")
                     }
                 }
@@ -49,14 +51,15 @@ subprojects {
 }
 
 repositories {
+    mavenLocal()
     gradlePluginPortal()
     mavenCentral()
-    mavenLocal()
 }
 
 dependencies {
     implementation(project(":api"))
     implementation(project(":gradle"))
+    runtimeOnly(project(":devtools"))
     implementation(project(":common"))
     implementation(project(":hytale"))
 }
@@ -72,7 +75,9 @@ gradlePlugin {
 
 mavenPublishing {
     publishToMavenCentral()
-    signAllPublications()
+    if (project.findProperty("signing.keyId") != null) {
+        signAllPublications()
+    }
     pom {
         name.set("ScaffoldIt")
         description.set("Gradle plugin and framework for cross-platform game mod development")
@@ -88,7 +93,7 @@ mavenPublishing {
         developers {
             developer {
                 id.set("adaliszk")
-                name.set("Ádám \"Kicsivazz\" Liszkai")
+                name.set("\"Kicsivazz\" Ádán Liszkai")
                 url.set("https://github.com/adaliszk")
             }
         }

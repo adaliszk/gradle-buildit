@@ -32,10 +32,11 @@ _and more coming soon_
 rootProject.name = "dev.example"
 pluginManagement {
     plugins {
-        id("dev.scaffoldit") version "0.1.3-dev"
+        id("dev.scaffoldit") version "0.1.5-dev"
         id("com.gradleup.shadow") version "9.3.1"
     }
     repositories {
+        gradlePluginPortal()
         mavenCentral()
     }
 }
@@ -46,9 +47,11 @@ hytale {
     manifest {
         Group = "ScaffoldIt"
         Name = "Example"
+        Main = "dev.example.mod.ExamplePlugin"
         IncludeAssetPack = true
     }
 }
+// that's it, no `build.gradle.kts` needed!
 ```
 
 ### `hytale { }`

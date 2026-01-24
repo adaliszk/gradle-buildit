@@ -28,14 +28,15 @@ class SourceManager : Gradle.ConfigurePaths {
 
     var flatLayout: Boolean = false
     var language: Language = Language.JAVA
-    var sourceDir: String = "src/main/${language.dir}"
+    val sourceDir: String
+        get() = "src/main/${language.dir}"
     var testsDir: String = "src/main/tests"
     var resourceDir: String = "src/main/resources"
     var assetsDir: String = "resources"
 
     fun configure(project: Project): SourceManager {
         log.lifecycle("> Plug :${project.name}:configure(project) by $cls")
-        language = if (project.extra["kotlin"] != null) Language.KOTLIN else Language.JAVA
+        this.language = if (project.extra["kotlin"] != null) Language.KOTLIN else Language.JAVA
         this.project = project
 
         val layout = resolveLayout()

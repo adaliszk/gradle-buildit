@@ -5,6 +5,9 @@
 **/.gradle
 **/.kotlin
 **/build
+**/node_modules
+**/.astro
+**/dist
 
 # Paths
 **/devserver

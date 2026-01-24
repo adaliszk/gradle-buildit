@@ -1,28 +1,22 @@
-extra["packageName"] = "ScaffoldIt Gradle"
-description = "Wires Gradle tasks and the plugin with ScaffoldIt."
+extra["packageName"] = "ScaffoldIt Devtools"
+description = "Provides a runtime plugin that instruments debug JRE with Hot Swapping."
 
 plugins {
     kotlin("jvm") version "2.3.0"
-    kotlin("plugin.serialization") version "2.3.0"
-    id("org.jetbrains.gradle.plugin.idea-ext") version "1.3"
 }
 
 repositories {
     mavenLocal()
     gradlePluginPortal()
     mavenCentral()
+    maven("https://maven.hytale.com/release")
 }
 
 dependencies {
-    // Gradle API for the plugin classpath
-    compileOnly(gradleApi())
-    // Kotlin Gradle Plugin to reference Kotlin DSL classes
-    implementation(kotlin("gradle-plugin"))
     implementation(kotlin("stdlib"))
-    // Libraries to simplify the implementation
-    implementation("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.3")
-    // Monorepo
-    implementation(project(":api"))
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+    implementation("net.bytebuddy:byte-buddy-agent:1.14.18")
+    compileOnly("com.hypixel.hytale:Server:+")
 }
 
 sourceSets {
