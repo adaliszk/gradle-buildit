@@ -108,8 +108,8 @@ mavenPublishing {
 
 sourceSets {
     main {
-        kotlin.setSrcDirs(listOf("source"))
-        java.setSrcDirs(listOf("source"))
+        kotlin.setSrcDirs(listOf("plugin"))
+        java.setSrcDirs(listOf("plugin"))
         resources.setSrcDirs(listOf("resources"))
     }
     test {
