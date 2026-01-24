@@ -11,7 +11,9 @@ repositories {
 }
 
 dependencies {
+    // Kotlin Gradle Plugin to reference Kotlin DSL classes
     implementation(kotlin("stdlib"))
+    implementation(kotlin("reflect"))
 }
 
 sourceSets {

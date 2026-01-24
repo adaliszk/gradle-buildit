@@ -16,7 +16,6 @@ repositories {
 }
 
 dependencies {
-    implementation(kotlin("stdlib"))
     implementation(project(":api"))
     implementation(project(":gradle"))
     implementation(project(":common"))

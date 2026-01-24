@@ -3,6 +3,7 @@ package dev.scaffoldit.hytale
 import dev.scaffoldit.api.ScaffoldIt
 import dev.scaffoldit.api.Wired
 import dev.scaffoldit.gradle.tasks.*
+import dev.scaffoldit.gradle.Gradle
 import org.gradle.api.Project
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging

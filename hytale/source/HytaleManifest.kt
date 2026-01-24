@@ -3,7 +3,6 @@
 
 package dev.scaffoldit.hytale
 
-import HytaleConfig
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.*

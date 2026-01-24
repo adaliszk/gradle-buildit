@@ -1,5 +1,7 @@
 plugins {
     kotlin("jvm") version "2.3.0"
+    id("org.jetbrains.gradle.plugin.idea-ext") version "1.3"
+    kotlin("plugin.serialization")
 }
 
 project.group = "dev.scaffoldit.hytale"
@@ -20,6 +22,8 @@ dependencies {
     implementation(kotlin("stdlib"))
     // Libraries
     implementation("net.bytebuddy:byte-buddy-agent:1.14.18")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+    implementation("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.3")
     compileOnly("com.hypixel.hytale:Server:+")
     // Monorepo
     implementation(project(":api"))
