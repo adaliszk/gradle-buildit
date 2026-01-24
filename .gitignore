@@ -1,8 +1,8 @@
-# Tools
+# Editors
 .idea
-.gradle
 
 # Artefacts
+**/.gradle
 **/.kotlin
 **/build
 
