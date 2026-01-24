@@ -1,8 +1,7 @@
-package dev.scaffoldit.gradle.tasks
+package dev.scaffoldit.hytale
 
 import dev.scaffoldit.gradle.Gradle
 import dev.scaffoldit.gradle.Language
-import dev.scaffoldit.gradle.hytale.HytaleConfig
 import org.gradle.api.Project
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging

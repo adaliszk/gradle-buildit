@@ -2,28 +2,16 @@ plugins {
     kotlin("jvm") version "2.3.0"
 }
 
-project.group = "dev.scaffoldit.hytale"
+project.group = "dev.scaffoldit.api"
 project.version = System.getenv("GITHUB_REF_NAME") ?: "0.0.0-dev"
 
 repositories {
-    gradlePluginPortal()
     mavenCentral()
     mavenLocal()
-    maven("https://maven.hytale.com/release")
 }
 
 dependencies {
-    // Gradle API for the plugin classpath
-    compileOnly(gradleApi())
-    // Kotlin Gradle Plugin to reference Kotlin DSL classes
-    implementation(kotlin("gradle-plugin"))
     implementation(kotlin("stdlib"))
-    // Libraries
-    implementation("net.bytebuddy:byte-buddy-agent:1.14.18")
-    compileOnly("com.hypixel.hytale:Server:+")
-    // Monorepo
-    implementation(project(":api"))
-    implementation(project(":gradle"))
 }
 
 sourceSets {

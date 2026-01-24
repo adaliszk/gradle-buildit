@@ -1,16 +1,19 @@
-package dev.scaffoldit.gradle.common
+package dev.scaffoldit.common
 
-import dev.scaffoldit.core.ScaffoldIt
-import dev.scaffoldit.core.Wired
+import dev.scaffoldit.api.ScaffoldIt
+import dev.scaffoldit.api.Wired
+import dev.scaffoldit.gradle.tasks.*
 import dev.scaffoldit.gradle.Gradle
-import dev.scaffoldit.gradle.tasks.ToolchainManager
-import dev.scaffoldit.gradle.tasks.NestedProjects
-import dev.scaffoldit.gradle.tasks.SourceManager
-import dev.scaffoldit.gradle.tasks.TestingEngine
 import org.gradle.api.initialization.Settings
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 
+/**
+ * Common Project will configure:
+ * - Standard Toolchain, Language, and Source Paths
+ * - Testing Engine using Kotest or pure JUnit with Coverage support
+ * - Nested projects with `include()` support
+ */
 open class CommonSettings(protected val settings: Settings) :
     Gradle.ConfigurePackages by NestedProjects(settings),
     Gradle.ConfigureToolchain by ToolchainManager(),

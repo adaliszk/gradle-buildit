@@ -1,6 +1,6 @@
 package dev.scaffoldit.gradle
 
-import dev.scaffoldit.core.Trait
+import dev.scaffoldit.api.Trait
 import org.gradle.api.Project
 
 @Suppress("PropertyName", "unused") // These are internal ones used for wiring!

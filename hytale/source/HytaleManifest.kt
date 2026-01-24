@@ -1,16 +1,15 @@
 @file:Suppress("PropertyName") // This is a DTO where the "manifest.json" dictates the name
 @file:OptIn(ExperimentalSerializationApi::class)
 
-package dev.buildit.gradle.hytale
+package dev.scaffoldit.hytale
 
-import dev.scaffoldit.gradle.hytale.HytaleConfig
+import HytaleConfig
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.*
 import org.gradle.api.Project
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.internal.extensions.core.extra
-import org.jetbrains.kotlin.gradle.utils.property
 import java.io.File
 
 

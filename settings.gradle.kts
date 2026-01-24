@@ -13,5 +13,7 @@ pluginManagement {
     }
 }
 
-includeBuild("plugin")
-include(":hytale")
+include("api")
+include("gradle")
+include("common")
+include("hytale")

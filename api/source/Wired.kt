@@ -1,4 +1,4 @@
-package dev.scaffoldit.core
+package dev.scaffoldit.api
 
 import kotlin.reflect.KClass
 

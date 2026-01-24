@@ -4,28 +4,41 @@ plugins {
     id("org.jetbrains.gradle.plugin.idea-ext") version "1.3"
     `java-gradle-plugin`
     `maven-publish`
-
 }
 
-project.group = "dev.scaffoldit.gradle"
+project.group = "dev.scaffoldit"
 project.version = System.getenv("GITHUB_REF_NAME") ?: "0.0.0-dev"
 
-gradlePlugin {
-    plugins {
-        register("plugin") {
-            id = "com.github.adaliszk.gradle-scaffoldit-modkit"
-            implementationClass = "dev.scaffoldit.gradle.Plugin"
-        }
-    }
+repositories {
+    gradlePluginPortal()
+    mavenCentral()
+    mavenLocal()
 }
 
-publishing {
-    publications {
-        create<MavenPublication>("maven") {
-            from(components["java"])
-        }
-    }
+dependencies {
+    implementation(kotlin("stdlib"))
+    implementation(project(":api"))
+    implementation(project(":gradle"))
+    implementation(project(":common"))
+    implementation(project(":hytale"))
 }
+
+//gradlePlugin {
+//    plugins {
+//        register("plugin") {
+//            id = "com.github.adaliszk.gradle-scaffoldit-modkit"
+//            implementationClass = "dev.scaffoldit.GradlePlugin"
+//        }
+//    }
+//}
+//
+//publishing {
+//    publications {
+//        create<MavenPublication>("maven") {
+//            from(components["java"])
+//        }
+//    }
+//}
 
 sourceSets {
     main {
@@ -37,23 +50,6 @@ sourceSets {
         kotlin.setSrcDirs(listOf("test"))
         java.setSrcDirs(listOf("test"))
     }
-}
-
-repositories {
-    gradlePluginPortal()
-    mavenCentral()
-    mavenLocal()
-}
-
-dependencies {
-    // Gradle API for the plugin classpath
-    compileOnly(gradleApi())
-    // Kotlin Gradle Plugin to reference Kotlin DSL classes
-    implementation(kotlin("gradle-plugin"))
-    implementation(kotlin("stdlib"))
-    // Libraries to simplify the implementation
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
-    implementation("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.3")
 }
 
 kotlin {

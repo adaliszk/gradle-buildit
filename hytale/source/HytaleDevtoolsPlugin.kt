@@ -1,6 +1,5 @@
 package dev.scaffoldit.hytale
 
-import com.hypixel.hytale.event.IBaseEvent
 import com.hypixel.hytale.logger.HytaleLogger
 import com.hypixel.hytale.server.core.Message
 import com.hypixel.hytale.server.core.event.events.player.PlayerConnectEvent
@@ -14,7 +13,7 @@ import java.security.ProtectionDomain
 import java.util.function.Consumer
 
 
-class DevelopmentPlugin(init: JavaPluginInit) : JavaPlugin(init) {
+class HytaleDevtoolsPlugin(init: JavaPluginInit) : JavaPlugin(init) {
     companion object {
         private val log = HytaleLogger.forEnclosingClass().atInfo()
     }

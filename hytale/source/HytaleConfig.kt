@@ -1,4 +1,4 @@
-package dev.scaffoldit.gradle.hytale
+package dev.scaffoldit.hytale
 
 import org.gradle.api.GradleException
 import org.gradle.api.Project
@@ -40,21 +40,15 @@ data class HytaleConfig(
             project.file("$homePath/install/$patchline/package/game/latest/Server/HytaleServer.jar")
         require(installed.isFile) { "HytaleServer.jar not found: ${installed.absolutePath}" }
         installed.absolutePath
-        // TODO: Use once there is a way to download the particular patchline
-        // installed.takeIf { it.exists() }?.absolutePath ?: run {
-        //    File(serverRunDir, "HytaleServer.jar").also { downloaded ->
-        //        URI("https://cdn.hytale.com/HytaleServer.jar").toURL().openStream().use {
-        //            it.copyTo(downloaded.outputStream())
-        //        }
-        //    }.absolutePath
-        // }
     }
 
+    // TODO: Use the overwritten manifest from Wired to provide a default
     val mainPackage: String = "${project.group}.${project.name}"
         .replace("-", ".")
         .replace("_", ".")
         .lowercase()
 
+    // TODO: Use the overwritten manifest from Wired to provide a default
     val mainClassName: String = project.name.replaceFirstChar { it.uppercase() } + "Plugin"
 
     fun validateHytaleInstallation() {

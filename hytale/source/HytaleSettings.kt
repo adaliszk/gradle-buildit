@@ -1,9 +1,8 @@
-package dev.scaffoldit.gradle.hytale
+package dev.scaffoldit.hytale
 
 import dev.buildit.gradle.hytale.HytaleManifest
-import dev.scaffoldit.core.ScaffoldIt
-import dev.scaffoldit.core.Wired
-import dev.scaffoldit.gradle.Gradle
+import dev.scaffoldit.api.ScaffoldIt
+import dev.scaffoldit.api.Wired
 import dev.scaffoldit.gradle.tasks.HytaleServerPlugin
 import dev.scaffoldit.gradle.tasks.ToolchainManager
 import dev.scaffoldit.gradle.tasks.NestedProjects
@@ -13,6 +12,13 @@ import org.gradle.api.initialization.Settings
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 
+/**
+ * Configure a Hytale project with:
+ * - Standard Toolchain, Language, and Source Paths
+ * - Testing Engine using Kotest or pure JUnit with Coverage support
+ * - Automatically resolved HytaleServer dependency
+ * - IDEA development server run configuration
+ */
 open class HytaleSettings(protected val settings: Settings) :
     Gradle.ConfigurePackages by NestedProjects(settings),
     Gradle.ConfigureToolchain by ToolchainManager(),

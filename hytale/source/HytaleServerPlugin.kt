@@ -1,8 +1,6 @@
-package dev.scaffoldit.gradle.tasks
+package dev.scaffoldit.hytale
 
-import dev.buildit.gradle.hytale.HytaleManifest
 import dev.scaffoldit.gradle.Gradle
-import dev.scaffoldit.gradle.hytale.HytaleConfig
 import org.gradle.api.Project
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.logging.Logger
@@ -16,10 +14,14 @@ class HytaleServerPlugin : Gradle.ConfigurePlatform {
         log.lifecycle("> Plug :${project.name}:HytaleServerPlugin(project)")
 
         val config = HytaleConfig(project)
-        config.validateHytaleInstallation()
+
+        project.repositories.maven {
+            it.url = project.uri("https://maven.hytale.com/${config.patchline}")
+        }
 
         with(project.dependencies) {
-            add("implementation", project.files(config.serverFilePath))
+            add("compileOnly", "com.hypixel.hytale:Server:+")
+            // add("compileOnly", project.files(config.serverFilePath))
         }
 
         with(project.tasks) {
