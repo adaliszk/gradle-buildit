@@ -1,0 +1,10 @@
+{
+    "Group": "ScaffoldIt",
+    "Name": "Devtools",
+    "Version": "0.0.0",
+    "Authors": [],
+    "DisabledByDefault": false,
+    "IncludesAssetPack": false,
+    "ServerVersion": "*",
+    "Main": "dev.scaffoldit.hytale.DevelopmentPlugin"
+}
