@@ -1,0 +1,31 @@
+{
+    "Version": 3,
+    "ServerName": "ScaffoldIt",
+    "MOTD": "",
+    "Password": "",
+    "MaxPlayers": 4,
+    "MaxViewRadius": 32,
+    "Defaults": {
+        "World": "default",
+        "GameMode": "Creative"
+    },
+    "ConnectionTimeouts": {
+        "JoinTimeouts": {}
+    },
+    "RateLimit": {},
+    "Modules": {
+        "PathPlugin": {
+            "Modules": {}
+        }
+    },
+    "LogLevels": {},
+    "Mods": {},
+    "DisplayTmpTagsInStrings": false,
+    "PlayerStorage": {
+        "Type": "Hytale"
+    },
+    "AuthCredentialStore": {
+        "Type": "Encrypted",
+        "Path": "auth.enc"
+    }
+}

@@ -1,0 +1,73 @@
+{
+    "Version": 4,
+    "UUID": {
+        "$binary": "WO9YPcfqQ4eoOV1XSoXCRQ==",
+        "$type": "04"
+    },
+    "DisplayName": "[DEV]",
+    "Seed": 1768514360118,
+    "WorldGen": {
+        "Type": "Flat",
+        "Tint": "#578a24",
+        "Layers": [
+            {
+                "From": 0,
+                "To": 78,
+                "BlockType": "Empty",
+                "Environment": "Env_Zone1_Plains"
+            },
+            {
+                "From": 79,
+                "To": 80,
+                "BlockType": "Rock_Chalk_Brick_Decorative",
+                "Environment": "Env_Zone1_Plains"
+            },
+            {
+                "From": 81,
+                "To": 320,
+                "BlockType": "Empty",
+                "Environment": "Env_Zone1_Plains"
+            }
+        ]
+    },
+    "WorldMap": {
+        "Type": "WorldGen"
+    },
+    "ChunkStorage": {
+        "Type": "Hytale"
+    },
+    "ChunkConfig": {},
+    "IsTicking": true,
+    "IsBlockTicking": true,
+    "IsPvpEnabled": false,
+    "IsFallDamageEnabled": false,
+    "IsGameTimePaused": true,
+    "GameTime": "0001-01-01T12:00:00Z",
+    "ClientEffects": {
+        "SunHeightPercent": 100.0,
+        "SunAngleDegrees": 0.0,
+        "BloomIntensity": 0.30000001192092896,
+        "BloomPower": 8.0,
+        "SunIntensity": 0.25,
+        "SunshaftIntensity": 0.30000001192092896,
+        "SunshaftScaleFactor": 4.0
+    },
+    "RequiredPlugins": {},
+    "GameMode": "Creative",
+    "IsSpawningNPC": false,
+    "IsSpawnMarkersEnabled": true,
+    "IsAllNPCFrozen": false,
+    "GameplayConfig": "Default",
+    "IsCompassUpdating": true,
+    "IsSavingPlayers": true,
+    "IsSavingChunks": true,
+    "SaveNewChunks": true,
+    "IsUnloadingChunks": true,
+    "IsObjectiveMarkersEnabled": true,
+    "DeleteOnUniverseStart": false,
+    "DeleteOnRemove": false,
+    "ResourceStorage": {
+        "Type": "Hytale"
+    },
+    "Plugin": {}
+}
