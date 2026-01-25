@@ -2,19 +2,15 @@ rootProject.name = "dev.scaffoldit"
 
 pluginManagement {
     plugins {
-        id("com.gradleup.shadow") version "9.3.1"
-        id("org.jetbrains.gradle.plugin.idea-ext") version "1.3"
+        id("org.jetbrains.gradle.plugin.idea-ext") version "1.3" apply false
         kotlin("jvm") version "2.3.0"
     }
     repositories {
+        mavenLocal()
         gradlePluginPortal()
         mavenCentral()
-        mavenLocal()
     }
 }
 
-include("api")
-include("gradle")
-include("devtools")
-include("common")
-include("hytale")
+include("api", "gradle", "devtools")
+include("common", "hytale")

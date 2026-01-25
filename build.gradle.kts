@@ -6,7 +6,7 @@ plugins {
 
 allprojects {
     group = "dev.scaffoldit"
-    version = "0.1.5-dev"
+    version = "0.1.6-dev"
 }
 
 subprojects {
@@ -59,6 +59,7 @@ repositories {
 dependencies {
     implementation(project(":api"))
     implementation(project(":gradle"))
+    compileOnly(project(":devtools"))
     runtimeOnly(project(":devtools"))
     implementation(project(":common"))
     implementation(project(":hytale"))

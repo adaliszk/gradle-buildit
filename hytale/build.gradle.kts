@@ -30,8 +30,19 @@ dependencies {
     implementation(project(":gradle"))
 }
 
+configurations {
+    apiElements {
+        outgoing.artifacts.clear()
+        outgoing.artifact(tasks.jar)
+    }
+    runtimeElements {
+        outgoing.artifacts.clear()
+        outgoing.artifact(tasks.jar)
+    }
+}
+
 tasks.shadowJar {
-    archiveClassifier.set("")
+    archiveClassifier.set("all")
     relocate("org.jetbrains.gradle.plugin.idea", "dev.scaffoldit.shaded.idea")
 }
 

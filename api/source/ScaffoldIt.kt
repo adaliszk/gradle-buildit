@@ -8,7 +8,7 @@ import kotlin.reflect.full.memberProperties
 
 class ScaffoldIt : Wired {
     companion object {
-        const val VERSION = "0.1.5-dev"
+        const val VERSION = "0.1.6-dev"
     }
 
     lateinit var parent: Any
