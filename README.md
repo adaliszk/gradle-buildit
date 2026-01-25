@@ -27,7 +27,7 @@ flexible framework for mod development for Hytale, _later for Minecraft._
 rootProject.name = "dev.example"
 pluginManagement {
     plugins {
-        id("dev.scaffoldit") version "0.1.5-dev"
+        id("dev.scaffoldit") version "0.1.6-dev"
     }
     repositories {
         gradlePluginPortal()
@@ -42,7 +42,7 @@ hytale {
         Group = "ScaffoldIt"
         Name = "Example"
         Main = "dev.example.mod.ExamplePlugin"
-        IncludeAssetPack = true
+        IncludesAssetPack = true
     }
 }
 // that's it, no `build.gradle.kts` needed!
@@ -51,8 +51,8 @@ hytale {
 ### `hytale { }`
 
 Configures a hytale project with dependencies, manifest management, and inherits common packages
-when they are declared. <!-- It automatically creates the necessary folder structure and even 
-creates an example main class for you. -->
+when they are declared. It automatically creates the necessary folder structure and even 
+creates an example main class for you.
 
 Options:
 
@@ -64,8 +64,8 @@ Options:
 ### `common { }`
 
 Collects and configures common library packages and adds them to the target projects as
-dependencies. <!-- Similarly to `hytale` it automatically creates the necessary folder structure,
-but will leave the main class up to you. -->
+dependencies. Similarly to `hytale` it automatically creates the necessary folder structure,
+but will leave the main class up to you.
 
 Options:
 
@@ -94,7 +94,7 @@ tasks but still exposes enough power to ship anything custom.
 
 ```kotlin
 dependencies {
-    implementation("dev.scaffoldit:api:0.1.5-dev")
+    implementation("dev.scaffoldit:api:0.1.6-dev")
 }
 ```
 
