@@ -5,14 +5,13 @@ flexible framework for mod development for Hytale, _later for Minecraft._
 
 ### Features
 
-- Hytale server dependencies using the official hytale maven
+- Hytale server dependencies using the official Hytale Maven
 - Monorepo support through common "multiloader" and "library" patterns
 - Mixed Kotlin and Java projects with automatic dependencies
+- Auto-create IDEA run configuration for JetBrains JRE hot swapping
+- Direct source linking (no copy-paste) with the devserver
+- Hot-reload plugin via an agent for hot module replacement
 - Delegation-based wiring for cross-platform mod development
-- Hot-swapping code and resources, including live reloading
-
-<!-- - Source provider for decompiling or using platforms such as Hytale -->
-<!-- - IDEA linter with compiler errors for fast feedback -->
 
 ### Requirements
 
@@ -45,7 +44,7 @@ hytale {
         IncludesAssetPack = true
     }
 }
-// that's it, no `build.gradle.kts` needed!
+// that's it, no build.gradle.kts needed (but the same can be done there)
 ```
 
 ### `hytale { }`
