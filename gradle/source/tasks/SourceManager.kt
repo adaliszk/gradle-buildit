@@ -23,7 +23,8 @@ class SourceManager : Gradle.ConfigurePaths {
     override fun useFlat() {
         log.lifecycle("> Set $cls:useFlat()")
         flatLayout = true
-        configure(project)
+
+        if(::project.isInitialized) configure(project)
     }
 
     var flatLayout: Boolean = false
@@ -40,6 +41,11 @@ class SourceManager : Gradle.ConfigurePaths {
         this.project = project
 
         val layout = resolveLayout()
+        project.file(layout.resourcePath).mkdirs()
+        project.file(layout.srcPath).mkdirs()
+        project.file(layout.assetsPath).mkdirs()
+        project.file(layout.testPath).mkdirs()
+
         log.lifecycle("> Source :$language(flat=$flatLayout) in ${project.file(layout.srcPath)}")
 
         fun <T : Any> NamedDomainObjectContainer<T>.configureSourceDirs(

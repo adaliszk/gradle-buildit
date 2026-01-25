@@ -31,6 +31,15 @@ open class HytaleSettings(protected val settings: Settings) :
     init {
         wire(this)
         log.lifecycle("> Plug :hytale(settings):initialize()")
+        with(settings.rootDir) {
+            if (resolve("common").exists()) {
+                resolve("hytale").mkdirs()
+                projectDir = "hytale"
+            }
+        }
+        settings.rootDir.resolve(projectDir).mkdirs().also {
+            if (projectDir.isNotBlank()) settings.include(":$projectDir")
+        }
         settings.gradle.projectsLoaded { gradle ->
             val project = gradle.rootProject.project(":$projectDir")
             with(ToolchainManager::class).configure(project)

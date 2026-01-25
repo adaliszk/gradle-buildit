@@ -34,7 +34,9 @@ class NestedProjects(private val settings: Settings) : Gradle.ConfigurePackages 
      * ```
      */
     override fun include(projectPath: String, userConfig: Project.() -> Unit) {
-        settings.include(projectPath.trimEnd(':'))
+        val path = ":common:$projectPath".trim(':').replace(':', '/')
+        settings.rootDir.resolve(path).mkdirs()
+        settings.include(":common:$projectPath".trimEnd(':'))
         projects.add(projectPath.trimEnd(':'))
     }
 }
