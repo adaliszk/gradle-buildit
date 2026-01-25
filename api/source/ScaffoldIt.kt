@@ -6,9 +6,9 @@ import kotlin.reflect.full.allSupertypes
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.memberProperties
 
-class ScaffoldIt : Wired {
+open class ScaffoldIt : Wired {
     companion object {
-        const val VERSION = "0.1.6-dev"
+        const val VERSION = "0.1.7-dev"
     }
 
     lateinit var parent: Any

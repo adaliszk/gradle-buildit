@@ -6,7 +6,7 @@ plugins {
 
 allprojects {
     group = "dev.scaffoldit"
-    version = "0.1.6-dev"
+    version = "0.1.7-dev"
 }
 
 subprojects {
