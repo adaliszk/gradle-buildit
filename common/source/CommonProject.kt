@@ -29,6 +29,9 @@ open class CommonProject(project: Project) :
     init {
         log.lifecycle("> Plug :common(project):initialize in :$projectDir")
         wire(this)
+        with(NestedProjects::class).projectDir = projectDir
+        with(SourceManager::class).projectDir = projectDir
+
         with(ToolchainManager::class).configure(project)
         with(SourceManager::class).configure(project)
         with(TestingEngine::class).configure(project)

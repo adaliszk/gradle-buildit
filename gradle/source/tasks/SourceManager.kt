@@ -48,7 +48,7 @@ class SourceManager : Gradle.ConfigurePaths {
         project.file(layout.assetsPath).mkdirs()
         project.file(layout.testPath).mkdirs()
 
-        log.lifecycle("> Source :$language(flat=$flatLayout) in ${project.file(layout.srcPath)}")
+        log.lifecycle("> Source :$language(flat=$flatLayout) in ${project.file(layout.srcPath).canonicalPath}")
 
         fun <T : Any> NamedDomainObjectContainer<T>.configureSourceDirs(
             resources: T.() -> SourceDirectorySet,
@@ -92,16 +92,16 @@ class SourceManager : Gradle.ConfigurePaths {
     fun resolveLayout(): SourceLayout {
         return when (flatLayout) {
             true -> SourceLayout(
-                srcPath = "$projectDir/source",
-                resourcePath = "$projectDir/resources",
+                srcPath = "source",
+                resourcePath = "resources",
                 assetsPath = "/$assetsDir",
-                testPath = "$projectDir/source",
+                testPath = "source",
             )
             else -> SourceLayout(
-                srcPath = "$projectDir/$sourceDir/$packageDir",
-                resourcePath = "$projectDir/$resourceDir",
+                srcPath = "$sourceDir/$packageDir",
+                resourcePath = resourceDir,
                 assetsPath = "/$assetsDir",
-                testPath = "$projectDir/$testsDir",
+                testPath = testsDir,
             )
         }
     }

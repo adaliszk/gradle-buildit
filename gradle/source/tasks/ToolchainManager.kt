@@ -61,6 +61,7 @@ class ToolchainManager : Gradle.ConfigureToolchain {
 
         configurePlugins()
         configureRepositories()
+        includeWorkspacePackages()
         pendingRepositoryChanges?.let { project.repositories.apply(it) }
         pendingDependencyChanges?.let { project.dependencies.apply(it) }
         configureToolchain()
@@ -85,6 +86,17 @@ class ToolchainManager : Gradle.ConfigureToolchain {
             apply("java-library")
             apply("org.gradle.maven-publish")
             apply("org.gradle.signing")
+        }
+    }
+
+    private fun includeWorkspacePackages() {
+        if (!project.gradle.extraProperties.has("includes")) return
+        @Suppress("UNCHECKED_CAST") // This is correct; I don't know where to cast it
+        val deps = project.gradle.extraProperties.get("includes") as List<String>
+        with(project.dependencies) {
+            deps.forEach {
+                add("implementation", project.project(it))
+            }
         }
     }
 
@@ -118,7 +130,7 @@ class ToolchainManager : Gradle.ConfigureToolchain {
         }
 
         project.tasks.withType(KotlinCompile::class.java).configureEach {
-            it.compilerOptions.jvmTarget.set(JvmTarget.JVM_21) // TODO: Expose the version as a configuration
+            it.compilerOptions.jvmTarget.set(JvmTarget.JVM_24) // TODO: Expose the version as a configuration
         }
 
         project.extraProperties.set("kotlin", kotlin)

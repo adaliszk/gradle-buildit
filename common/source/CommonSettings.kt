@@ -10,7 +10,6 @@ import org.gradle.api.Project
 import org.gradle.api.initialization.Settings
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
-import org.gradle.internal.extensions.core.extra
 
 /**
  * Common Project will configure:
@@ -32,17 +31,16 @@ open class CommonSettings(protected val settings: Settings) :
     init {
         wire(this)
         log.lifecycle("> Plug :common(settings):initialize in :$projectDir")
-        if (settings.rootDir.resolve(projectDir).exists()) {
-            settings.include(":$projectDir")
-        }
         settings.gradle.projectsLoaded { gradle ->
             log.lifecycle("> Plug :common(settings):projectsLoaded in :$projectDir")
-            val project = gradle.rootProject.project(":$projectDir")
+            with(NestedProjects::class).projectDir = projectDir
+            with(SourceManager::class).projectDir = projectDir
             with(NestedProjects::class) {
                 if (projectDir.isBlank() && _projectList.isEmpty()) {
-                    configureProject(project)
+                    configureProject(gradle.rootProject.project(":$projectDir"))
                 }
                 _projectList.forEach { path ->
+                    log.lifecycle("> Plug :common(settings):projectsLoaded -> $path")
                     val project = gradle.rootProject.project(path)
                     configureProject(project)
                 }
@@ -51,7 +49,11 @@ open class CommonSettings(protected val settings: Settings) :
     }
 
     private fun configureProject(project: Project) {
-        log.lifecycle("> Plug :common(settings):configureProject($projectDir)")
+        log.lifecycle("> Plug :common(settings):configureProject(${project.name}) in :$projectDir")
+
+        with(NestedProjects::class).projectDir = projectDir
+        with(SourceManager::class).projectDir = projectDir
+
         with(ToolchainManager::class).configure(project)
         with(SourceManager::class).configure(project)
         with(TestingEngine::class).configure(project)

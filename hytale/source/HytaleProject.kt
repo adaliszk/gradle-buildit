@@ -32,6 +32,9 @@ open class HytaleProject(private val project: Project) :
     init {
         log.lifecycle("> Plug :hytale(project):initialize in :$projectDir")
         wire(this)
+        with(NestedProjects::class).projectDir = project.projectDir.canonicalPath
+        with(SourceManager::class).projectDir = project.projectDir.canonicalPath
+
         with(ToolchainManager::class).configure(project)
         with(SourceManager::class).configure(project)
         with(TestingEngine::class).configure(project)
