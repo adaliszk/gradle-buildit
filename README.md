@@ -29,10 +29,6 @@ pluginManagement {
     plugins {
         id("dev.scaffoldit") version "0.1.7-dev"
     }
-    repositories {
-        gradlePluginPortal()
-        mavenCentral()
-    }
 }
 plugins {
     id("dev.scaffoldit")
