@@ -6,7 +6,7 @@ plugins {
 
 allprojects {
     group = "dev.scaffoldit"
-    version = "0.1.7-dev"
+    version = "0.1.14"
 }
 
 subprojects {
@@ -63,10 +63,10 @@ dependencies {
     runtimeOnly(project(":devtools"))
     implementation(project(":common"))
     implementation(project(":hytale"))
-    testImplementation(gradleTestKit())
-    testImplementation("io.kotest:kotest-runner-junit5:5.8.0")
-    testImplementation("io.kotest:kotest-assertions-core:5.8.0")
-    testImplementation("io.kotest:kotest-property:5.8.0")
+    //testImplementation(gradleTestKit())
+    //testImplementation("io.kotest:kotest-runner-junit5:5.8.0")
+    //testImplementation("io.kotest:kotest-assertions-core:5.8.0")
+    //testImplementation("io.kotest:kotest-property:5.8.0")
 }
 
 tasks.test {
@@ -132,11 +132,11 @@ kotlin {
 }
 
 tasks.withType<JavaCompile>().configureEach {
-    options.release.set(21)
+    options.release.set(24)
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
     compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_24)
     }
 }

@@ -36,11 +36,11 @@ kotlin {
 }
 
 tasks.withType<JavaCompile>().configureEach {
-  options.release.set(21)
+  options.release.set(24)
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
   compilerOptions {
-    jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+    jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_24)
   }
 }
