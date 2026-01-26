@@ -18,28 +18,30 @@ import org.gradle.api.logging.Logging
  * - IDEA development server run configuration
  */
 open class HytaleProject(private val project: Project) :
-  Gradle.ConfigureToolchain by ToolchainManager(),
-  Gradle.ConfigurePaths by SourceManager(),
-  Gradle.ConfigureTests by TestingEngine(),
-  Gradle.ConfigurePlatform by HytaleServerPlatform(),
-  Gradle.ConfigureIdeaDev by HytaleDevserverRun(),
-  Wired by ScaffoldIt() {
+    Gradle.ConfigureToolchain by ToolchainManager(),
+    Gradle.ConfigurePaths by SourceManager(),
+    Gradle.ConfigureTests by TestingEngine(),
+    Gradle.ConfigurePlatform by HytaleServerPlatform(),
+    Gradle.ConfigureIdeaDev by HytaleDevserverRun(),
+    Wired by ScaffoldIt() {
 
-  private val log: Logger = Logging.getLogger(this::class.java)
+    private val log: Logger = Logging.getLogger(this::class.java)
 
-  init {
-    wire(this)
-    log.lifecycle("> Plug :hytale(project):initialize()")
-    with(ToolchainManager::class).configure(project)
-    with(SourceManager::class).configure(project)
-    with(TestingEngine::class).configure(project)
-    with(HytaleServerPlatform::class).configure(project)
-    with(HytaleDevserverRun::class).configure(project)
-  }
+    override var projectDir: String = ""
 
-  fun manifest(config: HytaleManifest.() -> Unit) {
-    log.lifecycle("> Plug :hytale(project):manifest()")
-    HytaleManifest.from(project).apply(config).configure(project)
-    HytaleManifest.from(project).saveTo(project)
-  }
+    init {
+        log.lifecycle("> Plug :hytale(project):initialize in :$projectDir")
+        wire(this)
+        with(ToolchainManager::class).configure(project)
+        with(SourceManager::class).configure(project)
+        with(TestingEngine::class).configure(project)
+        with(HytaleServerPlatform::class).configure(project)
+        with(HytaleDevserverRun::class).configure(project)
+    }
+
+    fun manifest(config: HytaleManifest.() -> Unit) {
+        log.lifecycle("> Plug :hytale(project):manifest()")
+        HytaleManifest.from(project).apply(config).configure(project)
+        HytaleManifest.from(project).saveTo(project)
+    }
 }

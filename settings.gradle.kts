@@ -1,11 +1,11 @@
 rootProject.name = "dev.scaffoldit"
 
 pluginManagement {
-  repositories {
-    mavenLocal()
-    gradlePluginPortal()
-    mavenCentral()
-  }
+    repositories {
+        mavenLocal()
+        gradlePluginPortal()
+        mavenCentral()
+    }
 }
 
 include("api", "gradle", "devtools")
