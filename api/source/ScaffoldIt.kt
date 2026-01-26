@@ -1,3 +1,5 @@
+// Copyright © Ádám Liszkai, "Kicsivazz" - MIT in LICENSE.md - SPDX-License-Identifier: MIT
+
 package dev.scaffoldit.api
 
 import kotlin.reflect.KClass
@@ -7,10 +9,6 @@ import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.memberProperties
 
 open class ScaffoldIt : Wired {
-    companion object {
-        const val VERSION = "0.1.7-dev"
-    }
-
     lateinit var parent: Any
 
     override fun wire(parent: Any) {
