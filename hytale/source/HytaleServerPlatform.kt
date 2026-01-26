@@ -1,6 +1,8 @@
+// Copyright © Ádám Liszkai, "Kicsivazz" - MIT in LICENSE.md - SPDX-License-Identifier: MIT
+
 package dev.scaffoldit.hytale
 
-import dev.scaffoldit.api.ScaffoldIt
+import dev.scaffoldit.api.VERSION
 import dev.scaffoldit.gradle.Gradle
 import org.gradle.api.Project
 import org.gradle.api.file.DuplicatesStrategy
@@ -25,7 +27,7 @@ class HytaleServerPlatform : Gradle.ConfigurePlatform {
             add("runtimeOnly", "com.hypixel.hytale:Server:+")
             add(
                 "runtimeOnly",
-                "dev.scaffoldit:devtools:${ScaffoldIt.VERSION}"
+                "dev.scaffoldit:devtools:${VERSION}"
             )
         }
 

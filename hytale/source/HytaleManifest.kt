@@ -1,3 +1,5 @@
+// Copyright © Ádám Liszkai, "Kicsivazz" - MIT in LICENSE.md - SPDX-License-Identifier: MIT
+
 @file:Suppress("PropertyName") // This is a DTO where the "manifest.json" dictates the name
 @file:OptIn(ExperimentalSerializationApi::class)
 
@@ -27,6 +29,7 @@ data class HytaleManifest(
     var LoadBefore: Map<String, String>? = null,
     var ServerVersion: String = "*",
     var Main: String? = null,
+    var SubPlugins: List<HytaleManifest>? = null,
 ) {
     @Serializable
     data class Author(

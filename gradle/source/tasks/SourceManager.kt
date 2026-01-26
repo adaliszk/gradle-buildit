@@ -1,3 +1,5 @@
+// Copyright © Ádám Liszkai, "Kicsivazz" - MIT in LICENSE.md - SPDX-License-Identifier: MIT
+
 package dev.scaffoldit.gradle.tasks
 
 import dev.scaffoldit.gradle.Gradle
@@ -8,8 +10,8 @@ import org.gradle.api.file.SourceDirectorySet
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.gradle.api.tasks.SourceSetContainer
-import org.gradle.internal.extensions.core.extra
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
+import org.jetbrains.kotlin.gradle.plugin.extraProperties
 
 class SourceManager : Gradle.ConfigurePaths {
     private val log: Logger = Logging.getLogger(this::class.java)
@@ -37,7 +39,7 @@ class SourceManager : Gradle.ConfigurePaths {
 
     fun configure(project: Project): SourceManager {
         log.lifecycle("> Plug :${project.name}:configure(project) by $cls")
-        this.language = if (project.extra["kotlin"] != null) Language.KOTLIN else Language.JAVA
+        this.language = if (project.extraProperties.has("kotlin")) Language.KOTLIN else Language.JAVA
         this.project = project
 
         val layout = resolveLayout()

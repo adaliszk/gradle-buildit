@@ -1,3 +1,5 @@
+// Copyright © Ádám Liszkai, "Kicsivazz" - MIT in LICENSE.md - SPDX-License-Identifier: MIT
+
 package dev.scaffoldit.devtools
 
 import com.hypixel.hytale.common.plugin.PluginIdentifier
@@ -15,7 +17,6 @@ import net.bytebuddy.agent.ByteBuddyAgent
 import java.lang.instrument.ClassFileTransformer
 import java.security.ProtectionDomain
 import java.util.concurrent.ConcurrentHashMap
-
 
 class HytaleDevtoolsPlugin(init: JavaPluginInit) : JavaPlugin(init) {
     companion object {

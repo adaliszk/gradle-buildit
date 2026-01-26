@@ -1,3 +1,5 @@
+// Copyright © Ádám Liszkai, "Kicsivazz" - MIT in LICENSE.md - SPDX-License-Identifier: MIT
+
 package dev.scaffoldit.hytale
 
 import dev.scaffoldit.gradle.Gradle
@@ -14,9 +16,12 @@ import org.jetbrains.gradle.ext.IdeaExtPlugin
 import org.jetbrains.gradle.ext.ProjectSettings
 import org.jetbrains.gradle.ext.runConfigurations
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
+import org.jetbrains.kotlin.gradle.plugin.extraProperties
 
 class HytaleDevserverRun : Gradle.ConfigureIdeaDev {
     private val log: Logger = Logging.getLogger(this::class.java)
+
+    override var devserverDir: String = "devserver"
 
     fun configure(project: Project): Gradle.ConfigureIdeaDev {
         log.debug(":${project.name}:HytaleDevserverRun(project)")
@@ -25,7 +30,7 @@ class HytaleDevserverRun : Gradle.ConfigureIdeaDev {
 
         hytale.validateHytaleInstallation()
 
-        val serverRunDir = project.file("devserver")
+        val serverRunDir = project.file(devserverDir)
         if (serverRunDir.mkdirs()) {
             javaClass.getResourceAsStream("/server.zip")?.use { stream ->
                 project.zipTree(project.file("temp.zip").apply { writeBytes(stream.readBytes()) })
@@ -42,7 +47,7 @@ class HytaleDevserverRun : Gradle.ConfigureIdeaDev {
             var params =
                 "--allow-op --disable-sentry --accept-early-plugins --assets=\"$assetsPath\""
             val modPaths = mutableListOf<String>()
-            val language = if (project.extra["kotlin"] != null) Language.KOTLIN else Language.JAVA
+            val language = if (project.extraProperties.has("kotlin")) Language.KOTLIN else Language.JAVA
             val srcDir = when (language) {
                 Language.KOTLIN -> project.extensions.getByType(KotlinJvmProjectExtension::class.java).sourceSets
                     .getByName("main").kotlin.srcDirs.first().parentFile.absolutePath
@@ -65,14 +70,13 @@ class HytaleDevserverRun : Gradle.ConfigureIdeaDev {
                 val ideaProject = idea.project ?: return@configure
                 (ideaProject as ExtensionAware).extensions.configure(ProjectSettings::class.java) { settings ->
                     settings.runConfigurations.create(
-                        "${project.name}:devserver",
+                        "${project.name.substringAfterLast('.')}:devserver",
                         Application::class.java
                     ) { config ->
                         config.mainClass = "com.hypixel.hytale.Main"
                         config.moduleName = "${hytale.mainPackage}.main".removePrefix(".")
                         config.programParameters = createServerRunArguments()
                         config.workingDirectory = serverRunDir.absolutePath
-                        // config.workingDirectory = project.layout.buildDirectory.dir("libs").get().asFile.absolutePath
                         config.jvmArgs = "-XX:+AllowEnhancedClassRedefinition"
                     }
                 }

@@ -28,7 +28,7 @@ subprojects {
 
                 licenses {
                     license {
-                        name.set("BSD-3-Clause")
+                        name.set("MIT")
                         url.set("https://github.com/adaliszk/gradle-scaffoldit-modkit/blob/dev/LICENSE.md")
                     }
                 }
@@ -87,7 +87,7 @@ mavenPublishing {
 
         licenses {
             license {
-                name.set("BSD-3-Clause")
+                name.set("MIT")
                 url.set("https://github.com/adaliszk/gradle-scaffoldit-modkit/blob/dev/LICENSE.md")
             }
         }

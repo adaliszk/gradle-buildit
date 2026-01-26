@@ -1,11 +1,16 @@
+// Copyright © Ádám Liszkai, "Kicsivazz" - MIT in LICENSE.md - SPDX-License-Identifier: MIT
+
 package dev.scaffoldit.gradle.tasks
 
 import dev.scaffoldit.gradle.Gradle
 import org.gradle.api.Project
 import org.gradle.api.initialization.Settings
+import org.jetbrains.kotlin.gradle.plugin.extraProperties
 
 class NestedProjects(private val settings: Settings) : Gradle.ConfigurePackages {
-    private val projects: MutableList<String> = mutableListOf()
+    override val _projectList: MutableList<String> = mutableListOf()
+
+    override var projectDir: String = ""
 
     /**
      * Include multiple packages to configure their shared dependencies via
@@ -18,8 +23,8 @@ class NestedProjects(private val settings: Settings) : Gradle.ConfigurePackages 
      * }
      * ```
      */
-    override fun include(vararg projectPaths: String, userConfig: Project.() -> Unit) {
-        projectPaths.forEach { include(it, userConfig) }
+    override fun include(vararg projectList: String, userConfig: Project.() -> Unit) {
+        projectList.forEach { include(it, userConfig) }
     }
 
     /**
@@ -33,10 +38,13 @@ class NestedProjects(private val settings: Settings) : Gradle.ConfigurePackages 
      * }
      * ```
      */
-    override fun include(projectPath: String, userConfig: Project.() -> Unit) {
-        val path = ":common:$projectPath".trim(':').replace(':', '/')
-        settings.rootDir.resolve(path).mkdirs()
-        settings.include(":common:$projectPath".trimEnd(':'))
-        projects.add(projectPath.trimEnd(':'))
+    override fun include(project: String, userConfig: Project.() -> Unit) {
+        val projectPath = ":$projectDir:$project".trimEnd(':').replace("::", ":")
+        val resolvedPath = projectPath.replace(':', '/')
+        if (resolvedPath.isBlank()) return
+        settings.gradle.extraProperties.set("monorepo", true)
+        settings.rootDir.resolve(resolvedPath).mkdirs()
+        settings.include(projectPath)
+        _projectList.add(projectPath)
     }
 }
