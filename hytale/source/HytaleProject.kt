@@ -1,3 +1,5 @@
+// Copyright © Ádám Liszkai, "Kicsivazz" - MIT in LICENSE.md - SPDX-License-Identifier: MIT
+
 package dev.scaffoldit.hytale
 
 import dev.scaffoldit.api.ScaffoldIt

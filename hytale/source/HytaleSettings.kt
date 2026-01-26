@@ -1,12 +1,16 @@
+// Copyright © Ádám Liszkai, "Kicsivazz" - MIT in LICENSE.md - SPDX-License-Identifier: MIT
+
 package dev.scaffoldit.hytale
 
 import dev.scaffoldit.api.ScaffoldIt
 import dev.scaffoldit.api.Wired
 import dev.scaffoldit.gradle.tasks.*
 import dev.scaffoldit.gradle.Gradle
+import org.gradle.api.Project
 import org.gradle.api.initialization.Settings
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
+import org.jetbrains.kotlin.gradle.plugin.extraProperties
 
 /**
  * Configure a Hytale project with:
@@ -26,38 +30,47 @@ open class HytaleSettings(protected val settings: Settings) :
 
     private val log: Logger = Logging.getLogger(this::class.java)
 
-    override var projectDir: String = ""
+    override var projectDir: String = "hytale"
 
-    init {
-        wire(this)
-        log.lifecycle("> Plug :hytale(settings):initialize()")
-        with(settings.rootDir) {
-            if (resolve("common").exists()) {
-                resolve("hytale").mkdirs()
-                projectDir = "hytale"
-            }
-        }
-        settings.rootDir.resolve(projectDir).mkdirs().also {
-            if (projectDir.isNotBlank()) settings.include(":$projectDir")
-        }
-        settings.gradle.projectsLoaded { gradle ->
-            val project = gradle.rootProject.project(":$projectDir")
-            with(ToolchainManager::class).configure(project)
-            with(SourceManager::class).configure(project)
-            with(TestingEngine::class).configure(project)
-            with(HytaleServerPlatform::class).configure(project)
-            with(HytaleDevserverRun::class).configure(project)
-            log.lifecycle("> Plug :hytale(settings):initialize():projectsLoaded")
-        }
-    }
+    private var manifestConfig: (HytaleManifest.() -> Unit)? = null
 
     fun manifest(config: HytaleManifest.() -> Unit) {
         log.lifecycle("> Plug :hytale(settings):manifest()")
-        settings.gradle.projectsLoaded { gradle ->
-            val project = gradle.rootProject.project(":$projectDir")
-            HytaleManifest.from(project).apply(config).configure(project)
-            HytaleManifest.from(project).saveTo(project)
-            log.lifecycle("> Plug :hytale(settings):manifest():projectsLoaded")
+        manifestConfig = config
+    }
+
+    init {
+        wire(this)
+        settings.gradle.settingsEvaluated {
+            if (settings.gradle.extraProperties.has("monorepo")) {
+                settings.include(":$projectDir")
+            } else {
+                projectDir = ""
+            }
         }
+        settings.gradle.projectsLoaded  {
+            val project = configureProject()
+            manifestConfig?.let { config ->
+                HytaleManifest.from(project).apply(config).configure(project)
+                HytaleManifest.from(project).saveTo(project)
+            }
+        }
+        log.lifecycle("> Plug :hytale(settings):initialize()")
+    }
+
+    private fun configureProject(): Project {
+        log.lifecycle("> Plug :hytale(settings):configureProject($projectDir)")
+        settings.rootDir.resolve(projectDir).mkdirs()
+        val project = if (projectDir.isBlank()) {
+            settings.gradle.rootProject
+        } else {
+            settings.gradle.rootProject.project(":$projectDir")
+        }
+        with(ToolchainManager::class).configure(project)
+        with(SourceManager::class).configure(project)
+        with(TestingEngine::class).configure(project)
+        with(HytaleServerPlatform::class).configure(project)
+        with(HytaleDevserverRun::class).configure(project)
+        return project
     }
 }

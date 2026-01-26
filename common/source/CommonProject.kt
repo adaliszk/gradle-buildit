@@ -1,3 +1,5 @@
+// Copyright © Ádám Liszkai, "Kicsivazz" - MIT in LICENSE.md - SPDX-License-Identifier: MIT
+
 package dev.scaffoldit.common
 
 import dev.scaffoldit.api.ScaffoldIt
@@ -27,13 +29,10 @@ open class CommonProject(project: Project) :
     init {
         wire(this)
         project.afterEvaluate {
-            val commonDir = project.rootDir.resolve(projectDir)
-            if (commonDir.isDirectory) {
-                with(ToolchainManager::class).configure(project)
-                with(SourceManager::class).configure(project)
-                with(TestingEngine::class).configure(project)
-                log.lifecycle("> Plug :common:configure()")
-            }
+            with(ToolchainManager::class).configure(project)
+            with(SourceManager::class).configure(project)
+            with(TestingEngine::class).configure(project)
+            log.lifecycle("> Plug :common:configure()")
         }
     }
 }
