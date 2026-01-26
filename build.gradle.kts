@@ -63,10 +63,10 @@ dependencies {
     runtimeOnly(project(":devtools"))
     implementation(project(":common"))
     implementation(project(":hytale"))
-    //testImplementation(gradleTestKit())
-    //testImplementation("io.kotest:kotest-runner-junit5:5.8.0")
-    //testImplementation("io.kotest:kotest-assertions-core:5.8.0")
-    //testImplementation("io.kotest:kotest-property:5.8.0")
+    testImplementation(gradleTestKit())
+    testImplementation("io.kotest:kotest-runner-junit5:5.8.0")
+    testImplementation("io.kotest:kotest-assertions-core:5.8.0")
+    testImplementation("io.kotest:kotest-property:5.8.0")
 }
 
 tasks.test {
