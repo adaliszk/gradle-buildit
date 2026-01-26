@@ -1,7 +1,7 @@
 The MIT License (MIT)
 =====================
 
-Copyright © `2026` `Ádám Liszkai, "Kicsivazz"`
+Copyright © `2026` by `Ádám Liszkai, "Kicsivazz"`
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation

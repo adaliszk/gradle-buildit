@@ -17,22 +17,22 @@ import org.gradle.api.logging.Logging
  * - Nested projects with `include()` support
  */
 open class CommonProject(project: Project) :
-    Gradle.ConfigureToolchain by ToolchainManager(),
-    Gradle.ConfigurePaths by SourceManager(),
-    Gradle.ConfigureTests by TestingEngine(),
-    Wired by ScaffoldIt() {
+  Gradle.ConfigureToolchain by ToolchainManager(),
+  Gradle.ConfigurePaths by SourceManager(),
+  Gradle.ConfigureTests by TestingEngine(),
+  Wired by ScaffoldIt() {
 
-    private val log: Logger = Logging.getLogger(this::class.java)
+  private val log: Logger = Logging.getLogger(this::class.java)
 
-    override var projectDir: String = "common"
+  override var projectDir: String = "common"
 
-    init {
-        wire(this)
-        project.afterEvaluate {
-            with(ToolchainManager::class).configure(project)
-            with(SourceManager::class).configure(project)
-            with(TestingEngine::class).configure(project)
-            log.lifecycle("> Plug :common:configure()")
-        }
+  init {
+    wire(this)
+    project.afterEvaluate {
+      with(ToolchainManager::class).configure(project)
+      with(SourceManager::class).configure(project)
+      with(TestingEngine::class).configure(project)
+      log.lifecycle("> Plug :common:configure()")
     }
+  }
 }

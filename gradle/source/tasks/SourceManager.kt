@@ -19,7 +19,7 @@ class SourceManager : Gradle.ConfigurePaths {
 
     override var projectDir: String = ""
 
-    var packageDir: String = "" // TODO: Automatically initialize this
+    var packageDir: String = ""
     lateinit var project: Project
 
     override fun useFlat() {

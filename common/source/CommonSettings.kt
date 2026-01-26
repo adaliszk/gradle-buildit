@@ -19,40 +19,40 @@ import org.gradle.internal.extensions.core.extra
  * - Nested projects with `include()` support
  */
 open class CommonSettings(protected val settings: Settings) :
-    Gradle.ConfigurePackages by NestedProjects(settings),
-    Gradle.ConfigureToolchain by ToolchainManager(),
-    Gradle.ConfigurePaths by SourceManager(),
-    Gradle.ConfigureTests by TestingEngine(),
-    Wired by ScaffoldIt() {
+  Gradle.ConfigurePackages by NestedProjects(settings),
+  Gradle.ConfigureToolchain by ToolchainManager(),
+  Gradle.ConfigurePaths by SourceManager(),
+  Gradle.ConfigureTests by TestingEngine(),
+  Wired by ScaffoldIt() {
 
-    private val log: Logger = Logging.getLogger(this::class.java)
+  private val log: Logger = Logging.getLogger(this::class.java)
 
-    override var projectDir: String = "common"
+  override var projectDir: String = "common"
 
-    init {
-        wire(this)
-        log.lifecycle("> Plug :common:initialize()")
-        settings.gradle.settingsEvaluated {
-            if (settings.rootDir.resolve(projectDir).exists()) {
-                settings.include(":$projectDir")
-            }
-        }
-        settings.gradle.projectsLoaded { gradle ->
-            val project = gradle.rootProject.project(":$projectDir")
-            configureProject(project)
-            with(NestedProjects::class) {
-                _projectList.forEach { path ->
-                    val project = gradle.rootProject.project(path)
-                    configureProject(project)
-                }
-            }
-        }
+  init {
+    wire(this)
+    log.lifecycle("> Plug :common:initialize()")
+    settings.gradle.settingsEvaluated {
+      if (settings.rootDir.resolve(projectDir).exists()) {
+        settings.include(":$projectDir")
+      }
     }
-
-    private fun configureProject(project: Project) {
-        log.lifecycle("> Plug :common(settings):configureProject($projectDir)")
-        with(ToolchainManager::class).configure(project)
-        with(SourceManager::class).configure(project)
-        with(TestingEngine::class).configure(project)
+    settings.gradle.projectsLoaded { gradle ->
+      val project = gradle.rootProject.project(":$projectDir")
+      configureProject(project)
+      with(NestedProjects::class) {
+        _projectList.forEach { path ->
+          val project = gradle.rootProject.project(path)
+          configureProject(project)
+        }
+      }
     }
+  }
+
+  private fun configureProject(project: Project) {
+    log.lifecycle("> Plug :common(settings):configureProject($projectDir)")
+    with(ToolchainManager::class).configure(project)
+    with(SourceManager::class).configure(project)
+    with(TestingEngine::class).configure(project)
+  }
 }

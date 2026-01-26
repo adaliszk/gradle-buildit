@@ -25,34 +25,34 @@ import org.gradle.api.plugins.PluginAware
  */
 @Suppress("unused") // Used by Gradle, but that is not visible
 open class Plugin : Plugin<PluginAware> {
-    private val log: Logger = Logging.getLogger(Plugin::class.java)
+  private val log: Logger = Logging.getLogger(Plugin::class.java)
 
-    open val extensions: Map<String, Extension> = mapOf(
-        // "common" to Extension(CommonSettings::class.java, CommonProject::class.java),
-        // "hytale" to Extension(HytaleSettings::class.java, HytaleProject::class.java),
-    )
+  open val extensions: Map<String, Extension> = mapOf(
+    // "common" to Extension(CommonSettings::class.java, CommonProject::class.java),
+    // "hytale" to Extension(HytaleSettings::class.java, HytaleProject::class.java),
+  )
 
-    override fun apply(target: PluginAware) {
-        when (target) {
-            is Settings -> apply(target)
-            is Project -> apply(target)
-            else -> error(
-                "ScaffoldIt can only be applied to Settings or Project"
-            )
-        }
+  override fun apply(target: PluginAware) {
+    when (target) {
+      is Settings -> apply(target)
+      is Project -> apply(target)
+      else -> error(
+        "ScaffoldIt can only be applied to Settings or Project"
+      )
     }
+  }
 
-    open fun apply(settings: Settings) {
-        log.lifecycle("> Plug :${this::class.simpleName}.apply(settings)")
-        extensions.mapValues { (name, type) ->
-            settings.extensions.create(name, type.setting, settings)
-        }
+  open fun apply(settings: Settings) {
+    log.lifecycle("> Plug :${this::class.simpleName}.apply(settings)")
+    extensions.mapValues { (name, type) ->
+      settings.extensions.create(name, type.setting, settings)
     }
+  }
 
-    open fun apply(project: Project) {
-        log.lifecycle("> Plug :${this::class.simpleName}.apply(project)")
-        extensions.forEach { (name, type) ->
-            project.extensions.create(name, type.project, project)
-        }
+  open fun apply(project: Project) {
+    log.lifecycle("> Plug :${this::class.simpleName}.apply(project)")
+    extensions.forEach { (name, type) ->
+      project.extensions.create(name, type.project, project)
     }
+  }
 }

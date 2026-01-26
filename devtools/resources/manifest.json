@@ -3,7 +3,11 @@
     "Name": "Devtools",
     "Version": "0.1.5",
     "Authors": [
-        {"Name": "Kicsivazz", "Email": "scaffoldit@adaliszk.dev", "Website": "https://scaffoldit.dev"}
+        {
+            "Name": "Kicsivazz",
+            "Email": "scaffoldit@adaliszk.dev",
+            "Website": "https://scaffoldit.dev"
+        }
     ],
     "DisabledByDefault": false,
     "IncludesAssetPack": false,

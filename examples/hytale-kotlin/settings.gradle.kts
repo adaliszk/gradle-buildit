@@ -1,8 +1,8 @@
-rootProject.name = "example.kotlin"
+rootProject.name = "dev.scaffoldit.examples.kotlin"
 
 pluginManagement {
     plugins {
-        id("dev.scaffoldit") version "0.1.5-dev"
+        id("dev.scaffoldit") version "0.1.7-dev"
         id("com.gradleup.shadow") version "9.3.1"
     }
     repositories {
