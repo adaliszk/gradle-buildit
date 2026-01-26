@@ -62,17 +62,12 @@ kotlin {
     jvmToolchain(25)
 }
 
-//
-// We explicitly set the JVM target to 24 which is the highest supported by Kotlin 2.3.0
-// TODO: Remove the JVM 24 overwrites once Kotlin supports 25!
-//
-
 tasks.withType<JavaCompile>().configureEach {
-    options.release.set(24)
+    options.release.set(21)
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
     compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_24)
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
     }
 }

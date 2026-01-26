@@ -28,21 +28,39 @@ sourceSets {
     }
 }
 
-kotlin {
-    jvmToolchain(25)
+val generateBuildConfig by tasks.registering {
+    val outputDir = layout.buildDirectory.dir("generated")
+    outputs.dir(outputDir)
+    doLast {
+        val file = outputDir.get().file("VERSION.kt").asFile
+        file.parentFile.mkdirs()
+        file.writeText("""
+            // Copyright © Ádám Liszkai, "Kicsivazz" - MIT in LICENSE.md - SPDX-License-Identifier: MIT
+            
+            package dev.scaffoldit.api
+            
+            val VERSION = "${project.version}"
+        """.trimIndent())
+    }
 }
 
-//
-// We explicitly set the JVM target to 24 which is the highest supported by Kotlin 2.3.0
-// TODO: Remove the JVM 24 overwrites once Kotlin supports 25!
-//
+kotlin {
+    jvmToolchain(25)
+    sourceSets.main {
+        kotlin.srcDir(generateBuildConfig)
+    }
+}
+
+tasks.compileKotlin {
+    dependsOn(generateBuildConfig)
+}
 
 tasks.withType<JavaCompile>().configureEach {
-    options.release.set(24)
+    options.release.set(21)
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
     compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_24)
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
     }
 }
