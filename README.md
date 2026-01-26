@@ -25,13 +25,8 @@ flexible framework for mod development for Hytale, _and later for Minecraft._
 ```kotlin
 // settings.gradle.kts
 rootProject.name = "dev.example"
-pluginManagement {
-    plugins {
-        id("dev.scaffoldit") version "0.1.7-dev"
-    }
-}
 plugins {
-    id("dev.scaffoldit")
+    id("dev.scaffoldit") version "0.1.15"
 }
 hytale {
     manifest {
@@ -149,7 +144,7 @@ only need this agent, you can use it by adding:
 
 ```kotlin
 dependencies {
-    runtimeOnly("dev.scaffoldit:devtools:0.1.7-dev")
+    runtimeOnly("dev.scaffoldit:devtools:0.1.15")
 }
 ```
 
