@@ -12,11 +12,7 @@ import org.gradle.testing.jacoco.tasks.JacocoReport
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
 
 class TestingEngine : Gradle.ConfigureTests {
-    private val log: Logger = Logging.getLogger(this::class.java)
-    private val cls: String = "${this::class.simpleName}[${System.identityHashCode(this)}]"
-
     fun configure(project: Project): TestingEngine {
-        log.lifecycle("> Plug :${project.name}:configure(project) by $cls")
         val useKotlin = project.extraProperties.has("kotlin")
 
         project.pluginManager.apply("org.gradle.jacoco")

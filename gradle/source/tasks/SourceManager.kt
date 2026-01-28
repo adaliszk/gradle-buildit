@@ -7,45 +7,60 @@ import dev.scaffoldit.gradle.Language
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.api.file.SourceDirectorySet
-import org.gradle.api.logging.Logger
-import org.gradle.api.logging.Logging
 import org.gradle.api.tasks.SourceSetContainer
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
-import org.jetbrains.kotlin.gradle.plugin.extraProperties
+
+import org.gradle.api.logging.Logger
+import org.gradle.api.logging.Logging as GradleLogger
 
 class SourceManager : Gradle.ConfigurePaths {
-    private val log: Logger = Logging.getLogger(this::class.java)
-    private val cls: String = "${this::class.simpleName}[${System.identityHashCode(this)}]"
+    private val log: Logger = GradleLogger.getLogger(this::class.java)
 
     override var projectDir: String = ""
 
     var packageDir: String = ""
-    lateinit var project: Project
-
-    override fun useFlat() {
-        log.lifecycle("> Set $cls:useFlat()")
-        flatLayout = true
-
-        if(::project.isInitialized) configure(project)
-    }
 
     var flatLayout: Boolean = false
+
+    override fun useFlat() {
+        log.lifecycle("SourceManager.useFlat(current=$flatLayout)")
+        flatLayout = true
+    }
+
     var language: Language = Language.JAVA
-    val sourceDir: String
-        get() = "src/main/${language.dir}"
-    var testsDir: String = "src/main/tests"
-    var resourceDir: String = "src/main/resources"
-    var assetsDir: String = "resources"
+    val sourceDir: String get() = "src/main/${language.dir}"
+    var sourceResourceDir: String = "src/main/resources"
+    val testsDir: String get() = "src/test/${language.dir}"
+    var testResourceDir: String = "src/test/resources"
+    var assetsDir: String = "assets"
+
+    // region Internal APIs
+
+    private var useKotlin: Boolean = false
+
+    fun withKotlin(kotlin: String?): SourceManager {
+        if (kotlin != null) {useKotlin = true}
+        return this
+    }
+
+    lateinit var project: Project
+
+    fun configure() {
+        if (::project.isInitialized) configure(project)
+    }
 
     fun configure(project: Project): SourceManager {
-        log.lifecycle("> Plug :${project.name}:configure(project) by $cls")
-        this.language = if (project.extraProperties.has("kotlin")) Language.KOTLIN else Language.JAVA
+        this.language = if (useKotlin) Language.KOTLIN else Language.JAVA
         this.project = project
 
         val layout = resolveLayout()
-        project.file(layout.resourcePath).mkdirs()
+        project.file(layout.srcResourcePath).mkdirs()
         project.file(layout.srcPath).mkdirs()
-        project.file(layout.assetsPath).mkdirs()
+        val assetsPath = project.gradle.rootProject.file(layout.assetsPath).also {
+            it.mkdirs()
+        }
+        log.lifecycle("> Assets in ${assetsPath.canonicalPath}")
+        project.file(layout.testResourcePath).mkdirs()
         project.file(layout.testPath).mkdirs()
 
         log.lifecycle("> Source :$language(flat=$flatLayout) in ${project.file(layout.srcPath).canonicalPath}")
@@ -55,14 +70,15 @@ class SourceManager : Gradle.ConfigurePaths {
             source: T.() -> SourceDirectorySet
         ) {
             named("main") { main ->
-                main.resources().setSrcDirs(listOf(project.file(layout.resourcePath)))
+                main.resources().setSrcDirs(listOf(project.file(layout.srcResourcePath)))
                 main.source().setSrcDirs(listOf(project.file(layout.srcPath)))
             }
+            // TODO: Move [assets] to be opt-in feature
             findByName("assets") ?: create("assets") { assets ->
-                assets.resources().setSrcDirs(listOf(project.file(layout.assetsPath)))
+                assets.resources().setSrcDirs(listOf(assetsPath))
             }
             named("test") { test ->
-                test.resources().setSrcDirs(listOf(project.file(layout.resourcePath)))
+                test.resources().setSrcDirs(listOf(project.file(layout.testResourcePath)))
                 test.source().setSrcDirs(listOf(project.file(layout.testPath)))
             }
         }
@@ -72,7 +88,6 @@ class SourceManager : Gradle.ConfigurePaths {
                 project.extensions.getByType(KotlinJvmProjectExtension::class.java).sourceSets
                     .configureSourceDirs({ resources }, { kotlin })
             }
-
             Language.JAVA -> {
                 project.extensions.getByType(SourceSetContainer::class.java)
                     .configureSourceDirs({ resources }, { java })
@@ -82,26 +97,32 @@ class SourceManager : Gradle.ConfigurePaths {
         return this
     }
 
-    data class SourceLayout(
+    // endregion
+
+    private data class SourceLayout(
         val srcPath: String,
-        val resourcePath: String,
+        val srcResourcePath: String,
         val assetsPath: String,
-        val testPath: String
+        val testPath: String,
+        val testResourcePath: String,
     )
 
-    fun resolveLayout(): SourceLayout {
+    private fun resolveLayout(): SourceLayout {
         return when (flatLayout) {
             true -> SourceLayout(
                 srcPath = "source",
-                resourcePath = "resources",
-                assetsPath = "/$assetsDir",
+                srcResourcePath = "resources",
+                assetsPath = assetsDir,
                 testPath = "source",
+                testResourcePath = "resources",
             )
+
             else -> SourceLayout(
                 srcPath = "$sourceDir/$packageDir",
-                resourcePath = resourceDir,
-                assetsPath = "/$assetsDir",
+                srcResourcePath = sourceResourceDir,
+                assetsPath = assetsDir,
                 testPath = testsDir,
+                testResourcePath = testResourceDir,
             )
         }
     }

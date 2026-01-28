@@ -1,20 +1,28 @@
 plugins {
     kotlin("jvm") version "2.3.0"
     id("com.vanniktech.maven.publish") version "0.36.0"
+    id("io.kotest") version "6.1.1"
+    id("com.google.devtools.ksp") version "2.3.4"
     `java-gradle-plugin`
 }
 
 allprojects {
     group = "dev.scaffoldit"
-    version = "0.1.15"
+    version = "0.2.0"
 }
 
 subprojects {
     apply(plugin = "com.vanniktech.maven.publish")
 
+    tasks.matching { it.name == "sourcesJar" }.configureEach {
+        (this as Jar).mustRunAfter(tasks.matching { it.name == "compileTestJava" })
+    }
+
     afterEvaluate {
-        val pkgName = project.extra["packageName"] as String? ?: project.name
-        val pkgDesc = project.description ?: project.name
+        val x = extensions.extraProperties
+        val pkgName = if (x.has("packageName")) x["packageName"].toString() else name
+        val pkgDesc = description ?: name
+
         mavenPublishing {
             publishToMavenCentral()
             if (project.findProperty("signing.keyId") != null) {
@@ -59,25 +67,24 @@ repositories {
 dependencies {
     implementation(project(":api"))
     implementation(project(":gradle"))
-    compileOnly(project(":devtools"))
-    runtimeOnly(project(":devtools"))
+    implementation(project(":devtools"))
     implementation(project(":common"))
     implementation(project(":hytale"))
-    testImplementation(gradleTestKit())
-    testImplementation("io.kotest:kotest-runner-junit5:5.8.0")
-    testImplementation("io.kotest:kotest-assertions-core:5.8.0")
-    testImplementation("io.kotest:kotest-property:5.8.0")
+    testImplementation("io.kotest:kotest-runner-junit5:6.1.1")
+    testImplementation("io.kotest:kotest-assertions-core:6.1.1")
+    testImplementation("io.kotest:kotest-property:6.1.1")
+    testImplementation("io.github.serpro69:kotlin-faker:1.15.0")
 }
 
-tasks.test {
+tasks.withType<Test>().configureEach {
     useJUnitPlatform()
 }
 
 gradlePlugin {
     plugins {
         register("mavenCentral") {
-            id = "dev.scaffoldit"
             implementationClass = "dev.scaffoldit.GradlePlugin"
+            id = "dev.scaffoldit"
         }
     }
 }
@@ -117,18 +124,26 @@ mavenPublishing {
 
 sourceSets {
     main {
-        kotlin.setSrcDirs(listOf("plugin"))
-        java.setSrcDirs(listOf("plugin"))
-        resources.setSrcDirs(listOf("resources"))
+        kotlin.setSrcDirs(listOf("plugin/source"))
+        java.setSrcDirs(listOf("plugin/source"))
+        resources.setSrcDirs(listOf("plugin/resources"))
     }
     test {
-        kotlin.setSrcDirs(listOf("tests"))
-        java.setSrcDirs(listOf("tests"))
+        kotlin.setSrcDirs(listOf("plugin/tests"))
+        java.setSrcDirs(listOf("plugin/tests"))
+        resources.srcDir(tasks.pluginUnderTestMetadata.map { it.outputDirectory })
     }
 }
 
 kotlin {
     jvmToolchain(25)
+    sourceSets {
+        test {
+            dependencies {
+                implementation("io.kotest:kotest-framework-engine:6.1.1")
+            }
+        }
+    }
 }
 
 tasks.withType<JavaCompile>().configureEach {

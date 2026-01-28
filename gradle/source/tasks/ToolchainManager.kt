@@ -6,57 +6,53 @@ import dev.scaffoldit.gradle.Gradle
 import org.gradle.api.Project
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.artifacts.dsl.RepositoryHandler
-import org.gradle.api.logging.Logger
-import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.tasks.compile.JavaCompile
-import org.gradle.internal.extensions.core.extra
 import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
-import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-class ToolchainManager : Gradle.ConfigureToolchain {
-    private val log: Logger = Logging.getLogger(this::class.java)
-    private val cls: String = "${this::class.simpleName}[${System.identityHashCode(this)}]"
+import org.gradle.api.logging.Logger
+import org.gradle.internal.extensions.core.extra
+import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
+import org.gradle.api.logging.Logging as GradleLogger
 
-    // region Extension APIs
+class ToolchainManager : Gradle.ConfigureToolchain {
+    var log: Logger = GradleLogger.getLogger(this::class.java)
 
     /**  Kotlin standard library package, use internal or external, your choice. */
-    var kotlin: String? = null
+    override var kotlin: String? = null
 
     /** Use kotlin for this scope, use internal or external, your choice. */
     override fun useKotlin(dependencyNotation: String?) {
-        log.lifecycle("> Set $cls:useKotlin($dependencyNotation)")
         kotlin = dependencyNotation ?: "org.jetbrains.kotlin:kotlin-stdlib"
-        configure()
+        log.lifecycle("ToolchainManager.useKotlin($kotlin)")
+        if(::project.isInitialized) configureKotlin()
     }
 
     private var pendingRepositoryChanges: (RepositoryHandler.() -> Unit)? = null
 
     override fun repositories(action: RepositoryHandler.() -> Unit) {
         pendingRepositoryChanges = action
-        configure()
     }
 
     private var pendingDependencyChanges: (DependencyHandler.() -> Unit)? = null
 
     override fun dependencies(action: DependencyHandler.() -> Unit) {
         pendingDependencyChanges = action
-        configure()
     }
 
-    // endregion
+    // region Internal APIs
 
-    private lateinit var project: Project
+    lateinit var project: Project
 
     fun configure() {
         if (::project.isInitialized) configure(project)
     }
 
     fun configure(project: Project): ToolchainManager {
-        log.lifecycle("> Plug :${project.name}:configure(project) by $cls")
+        log.debug("ToolchainManager.configure(kotlin=$kotlin)")
+        project.extra.set("kotlin", kotlin)
         this.project = project
 
         configurePlugins()
@@ -69,6 +65,8 @@ class ToolchainManager : Gradle.ConfigureToolchain {
 
         return this
     }
+
+    // endregion
 
     private fun configureRepositories() {
         with(project.repositories) {
@@ -90,11 +88,8 @@ class ToolchainManager : Gradle.ConfigureToolchain {
     }
 
     private fun includeWorkspacePackages() {
-        if (!project.gradle.extraProperties.has("includes")) return
-        @Suppress("UNCHECKED_CAST") // This is correct; I don't know where to cast it
-        val deps = project.gradle.extraProperties.get("includes") as List<String>
         with(project.dependencies) {
-            deps.forEach {
+            NestedProjects.included.forEach {
                 add("implementation", project.project(it))
             }
         }
@@ -110,7 +105,7 @@ class ToolchainManager : Gradle.ConfigureToolchain {
         }
 
         project.tasks.withType(JavaCompile::class.java).configureEach {
-            it.options.release.set(21)  // TODO: Expose the version as a configuration
+            it.options.release.set(24)  // TODO: Expose the version as a configuration
         }
     }
 
@@ -132,7 +127,5 @@ class ToolchainManager : Gradle.ConfigureToolchain {
         project.tasks.withType(KotlinCompile::class.java).configureEach {
             it.compilerOptions.jvmTarget.set(JvmTarget.JVM_24) // TODO: Expose the version as a configuration
         }
-
-        project.extraProperties.set("kotlin", kotlin)
     }
 }

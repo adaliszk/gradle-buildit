@@ -1,12 +1,9 @@
-// Copyright © Ádám Liszkai, "Kicsivazz" - MIT in LICENSE.md - SPDX-License-Identifier: MIT
-
 package dev.scaffoldit
 
-import dev.scaffoldit.gradle.Extension
-import dev.scaffoldit.gradle.Plugin
-
-import dev.scaffoldit.common.CommonSettings
 import dev.scaffoldit.common.CommonProject
+import dev.scaffoldit.common.CommonSettings
+import dev.scaffoldit.gradle.ExtensionSet
+import dev.scaffoldit.gradle.Plugin
 import dev.scaffoldit.hytale.HytaleProject
 import dev.scaffoldit.hytale.HytaleSettings
 
@@ -24,8 +21,8 @@ import dev.scaffoldit.hytale.HytaleSettings
  */
 @Suppress("unused") // Used by Gradle, but that is not visible
 open class GradlePlugin : Plugin() {
-  override val extensions = mapOf(
-    "common" to Extension(CommonSettings::class.java, CommonProject::class.java),
-    "hytale" to Extension(HytaleSettings::class.java, HytaleProject::class.java),
-  )
+    override val extensions = mapOf(
+        "common" to ExtensionSet(CommonSettings::class.java, CommonProject::class.java),
+        "hytale" to ExtensionSet(HytaleSettings::class.java, HytaleProject::class.java),
+    )
 }

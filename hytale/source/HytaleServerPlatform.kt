@@ -11,11 +11,7 @@ import org.gradle.api.logging.Logging
 import org.gradle.api.tasks.Copy
 
 class HytaleServerPlatform : Gradle.ConfigurePlatform {
-    private val log: Logger = Logging.getLogger(this::class.java)
-
     fun configure(project: Project): Gradle.ConfigurePlatform {
-        log.lifecycle("> Plug :${project.name}:HytaleServerPlugin(project)")
-
         val config = HytaleConfig(project)
 
         project.repositories.maven {
@@ -29,10 +25,8 @@ class HytaleServerPlatform : Gradle.ConfigurePlatform {
                 "runtimeOnly",
                 "dev.scaffoldit:devtools:${VERSION}"
             )
-            project.afterEvaluate {
-                project.gradle.allprojects { lib ->
-                    add("implementation", lib)
-                }
+            project.gradle.allprojects { lib ->
+                add("implementation", lib)
             }
         }
 
@@ -44,11 +38,9 @@ class HytaleServerPlatform : Gradle.ConfigurePlatform {
                     }
                 }
 
-            project.afterEvaluate {
-                named("processResources", Copy::class.java) { task ->
-                    task.dependsOn(updateManifest)
-                    task.duplicatesStrategy = DuplicatesStrategy.INCLUDE
-                }
+            named("processResources", Copy::class.java) { task ->
+                task.dependsOn(updateManifest)
+                task.duplicatesStrategy = DuplicatesStrategy.INCLUDE
             }
         }
 

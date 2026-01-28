@@ -2,6 +2,7 @@
 
 package dev.scaffoldit.gradle
 
+import dev.scaffoldit.gradle.tasks.NestedProjects
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.initialization.Settings
@@ -27,12 +28,12 @@ import org.gradle.api.plugins.PluginAware
 open class Plugin : Plugin<PluginAware> {
     private val log: Logger = Logging.getLogger(Plugin::class.java)
 
-    open val extensions: Map<String, Extension> = mapOf(
-        // "common" to Extension(CommonSettings::class.java, CommonProject::class.java),
-        // "hytale" to Extension(HytaleSettings::class.java, HytaleProject::class.java),
-    )
+    open val extensions: Map<String, ExtensionSet<*, *>> = emptyMap()
 
     override fun apply(target: PluginAware) {
+        // There is no real isolation during testing, so we need to reset:
+        NestedProjects.included.clear()
+        // Real lifetime:
         when (target) {
             is Settings -> apply(target)
             is Project -> apply(target)
@@ -43,15 +44,13 @@ open class Plugin : Plugin<PluginAware> {
     }
 
     open fun apply(settings: Settings) {
-        log.lifecycle("> Plug :${this::class.simpleName}.apply(settings)")
         extensions.mapValues { (name, type) ->
             settings.extensions.create(name, type.setting, settings)
         }
     }
 
     open fun apply(project: Project) {
-        log.lifecycle("> Plug :${this::class.simpleName}.apply(project)")
-        extensions.forEach { (name, type) ->
+        extensions.mapValues { (name, type) ->
             project.extensions.create(name, type.project, project)
         }
     }

@@ -3,16 +3,19 @@
 package dev.scaffoldit.gradle.tasks
 
 import dev.scaffoldit.gradle.Gradle
+import groovy.lang.Closure
 import org.gradle.api.Project
-import org.gradle.api.initialization.Settings
+
 import org.gradle.api.logging.Logger
-import org.gradle.api.logging.Logging
-import org.jetbrains.kotlin.gradle.plugin.extraProperties
+import org.gradle.api.logging.Logging as GradleLogger
 
-class NestedProjects(private val settings: Settings) : Gradle.ConfigurePackages {
-    private val log: Logger = Logging.getLogger(this::class.java)
 
-    override val _projectList: MutableList<String> = mutableListOf()
+class NestedProjects : Gradle.ConfigurePackages {
+    private val log: Logger = GradleLogger.getLogger(this::class.java)
+
+    companion object {
+        val included: MutableList<String> = mutableListOf()
+    }
 
     override var projectDir = ""
 
@@ -31,26 +34,28 @@ class NestedProjects(private val settings: Settings) : Gradle.ConfigurePackages 
         projectList.forEach { include(it, userConfig) }
     }
 
-    /**
-     * Include a package to configure their shared dependencies via
-     * opening the include block:
-     * ```kotlin
-     * include("api") {
-     *   dependencies {
-     *     compileOnly("...")
-     *   }
-     * }
-     * ```
-     */
+    override fun include(vararg projectList: String, userConfig: Closure<*>) {
+        projectList.forEach { include(it, userConfig) }
+    }
+
+    override fun include(vararg projectList: String) {
+        projectList.forEach { include(it) }
+    }
+
     override fun include(project: String, userConfig: Project.() -> Unit) {
-        log.lifecycle("> Plug :nested(settings):include($project) in :$projectDir")
         val projectPath = ":$projectDir:$project".trimEnd(':').replace("::", ":")
-        val resolvedPath = projectPath.trimStart(':').replace(':', '/')
-        if (resolvedPath.isBlank()) return
-        settings.gradle.extraProperties.set("monorepo", true)
-        settings.rootDir.resolve(resolvedPath).mkdirs()
-        settings.include(projectPath)
-        _projectList.add(projectPath)
-        settings.gradle.extraProperties.set("includes", _projectList)
+        log.lifecycle("NestedProjects.include($projectPath)")
+        if (projectPath.trim(':').isBlank()) return
+        included.add(projectPath)
+    }
+
+    override fun include(project: String) = include(project) {}
+
+    override fun include(project: String, userConfig: Closure<*>) {
+        include(project) {
+            userConfig.delegate = this
+            userConfig.resolveStrategy = Closure.DELEGATE_FIRST
+            userConfig.call()
+        }
     }
 }

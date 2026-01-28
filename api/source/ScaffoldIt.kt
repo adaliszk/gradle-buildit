@@ -9,9 +9,9 @@ import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.memberProperties
 
 open class ScaffoldIt : Wired {
-  lateinit var parent: Any
+  override lateinit var parent: Wired
 
-  override fun wire(parent: Any) {
+  override fun wire(parent: Wired) {
     this.parent = parent
   }
 

@@ -2,14 +2,9 @@
 
 package dev.scaffoldit.common
 
-import dev.scaffoldit.api.ScaffoldIt
-import dev.scaffoldit.api.Wired
-import dev.scaffoldit.gradle.tasks.*
 import dev.scaffoldit.gradle.Gradle
-import org.gradle.api.Project
+import dev.scaffoldit.gradle.tasks.NestedProjects
 import org.gradle.api.initialization.Settings
-import org.gradle.api.logging.Logger
-import org.gradle.api.logging.Logging
 
 /**
  * Common Project will configure:
@@ -18,44 +13,38 @@ import org.gradle.api.logging.Logging
  * - Nested projects with `include()` support
  */
 open class CommonSettings(protected val settings: Settings) :
-    Gradle.ConfigurePackages by NestedProjects(settings),
-    Gradle.ConfigureToolchain by ToolchainManager(),
-    Gradle.ConfigurePaths by SourceManager(),
-    Gradle.ConfigureTests by TestingEngine(),
-    Wired by ScaffoldIt() {
-
-    private val log: Logger = Logging.getLogger(this::class.java)
+    Gradle.ConfigurePackages by NestedProjects(),
+    CommonExtension() {
 
     override var projectDir: String = "common"
 
     init {
-        wire(this)
-        log.lifecycle("> Plug :common(settings):initialize in :$projectDir")
-        settings.gradle.projectsLoaded { gradle ->
-            log.lifecycle("> Plug :common(settings):projectsLoaded in :$projectDir")
-            with(NestedProjects::class).projectDir = projectDir
-            with(SourceManager::class).projectDir = projectDir
-            with(NestedProjects::class) {
-                if (projectDir.isBlank() && _projectList.isEmpty()) {
-                    configureProject(gradle.rootProject.project(":$projectDir"))
-                }
-                _projectList.forEach { path ->
-                    log.lifecycle("> Plug :common(settings):projectsLoaded -> $path")
-                    val project = gradle.rootProject.project(path)
-                    configureProject(project)
-                }
+        val rootDir = settings.rootDir.resolve(projectDir)
+        log.lifecycle("$pfx:common(settings):initialize with ${rootDir.canonicalPath}")
+        with(NestedProjects::class).projectDir = projectDir
+
+        settings.gradle.settingsEvaluated {
+            if (!rootDir.exists()) return@settingsEvaluated
+            log.lifecycle("$pfx:common(settings):settingsEvaluated with ${NestedProjects.included}")
+            settings.include(":$projectDir")
+            NestedProjects.included.forEach { subProjectDir ->
+                val (dir, path) = resolveProject(subProjectDir)
+                settings.rootDir.resolve(path).mkdirs()
+                settings.include(dir)
             }
         }
-    }
 
-    private fun configureProject(project: Project) {
-        log.lifecycle("> Plug :common(settings):configureProject(${project.name}) in :$projectDir")
-
-        with(NestedProjects::class).projectDir = projectDir
-        with(SourceManager::class).projectDir = projectDir
-
-        with(ToolchainManager::class).configure(project)
-        with(SourceManager::class).configure(project)
-        with(TestingEngine::class).configure(project)
+        settings.gradle.projectsLoaded {
+            if (!rootDir.exists()) return@projectsLoaded
+            log.lifecycle("$pfx:common(settings):projectsLoaded with ${NestedProjects.included}")
+            if (NestedProjects.included.isEmpty()) {
+                configureProject(settings.gradle.rootProject.project(projectDir))
+                return@projectsLoaded
+            }
+            NestedProjects.included.forEach { subProjectDir ->
+                val (dir, path) = resolveProject(subProjectDir)
+                configureProject(settings.gradle.rootProject.project(dir))
+            }
+        }
     }
 }

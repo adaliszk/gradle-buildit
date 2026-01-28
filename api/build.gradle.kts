@@ -1,10 +1,11 @@
+plugins {
+    kotlin("jvm") version "2.3.0"
+    `java-library`
+}
+
 extra["packageName"] = "ScaffoldIt API"
 description =
     "Provides interfaces and generic handlers for wiring components and systems via delegation."
-
-plugins {
-    kotlin("jvm") version "2.3.0"
-}
 
 repositories {
     mavenLocal()
@@ -54,18 +55,16 @@ kotlin {
     }
 }
 
-afterEvaluate {
-    tasks.named<Jar>("sourcesJar") {
-        dependsOn(generateBuildConfig, tasks.compileJava)
-    }
+java {
+    withSourcesJar()
 }
 
-tasks.compileJava {
-    dependsOn(generateBuildConfig)
+tasks.named<Jar>("sourcesJar") {
+
 }
 
-tasks.compileKotlin {
-    dependsOn(generateBuildConfig)
+tasks.named<Jar>("sourcesJar") {
+    dependsOn(generateBuildConfig, tasks.compileJava)
 }
 
 tasks.withType<JavaCompile>().configureEach {

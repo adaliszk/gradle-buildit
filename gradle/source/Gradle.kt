@@ -3,6 +3,7 @@
 package dev.scaffoldit.gradle
 
 import dev.scaffoldit.api.Trait
+import groovy.lang.Closure
 import org.gradle.api.Project
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.artifacts.dsl.RepositoryHandler
@@ -17,15 +18,19 @@ object Gradle {
 
     interface ConfigurePackages : Trait {
         val _wiredConfigurePackages: ConfigurePackages get() = this
-        val _projectList: MutableList<String>
         fun include(vararg projectList: String, userConfig: Project.() -> Unit = {})
+        fun include(vararg projectList: String, userConfig: Closure<*>)
+        fun include(vararg projectList: String)
         fun include(project: String, userConfig: Project.() -> Unit = {})
+        fun include(project: String, userConfig: Closure<*>)
+        fun include(project: String)
         var projectDir: String
     }
 
     interface ConfigureToolchain : Trait {
         val _wiredConfigureToolchain: ConfigureToolchain get() = this
         fun useKotlin(dependencyNotation: String? = null)
+        val kotlin: String?
         fun repositories(action: RepositoryHandler.() -> Unit)
         fun dependencies(action: DependencyHandler.() -> Unit)
     }

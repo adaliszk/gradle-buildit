@@ -19,50 +19,49 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
 
 class HytaleDevserverRun : Gradle.ConfigureIdeaDev {
-  private val log: Logger = Logging.getLogger(this::class.java)
+    private val log: Logger = Logging.getLogger(this::class.java)
 
-  override var devserverDir: String = "devserver"
+    override var devserverDir: String = "devserver"
 
-  fun configure(project: Project): Gradle.ConfigureIdeaDev {
-    log.debug(":${project.name}:HytaleDevserverRun(project)")
+    fun configure(project: Project): Gradle.ConfigureIdeaDev {
+        log.debug(":${project.name}:HytaleDevserverRun(project)")
 
-    val hytale = HytaleConfig(project)
+        val hytale = HytaleConfig(project)
 
-    hytale.validateHytaleInstallation()
+        hytale.validateHytaleInstallation()
 
-    val serverRunDir = project.file(devserverDir)
-    if (serverRunDir.mkdirs()) {
-      javaClass.getResourceAsStream("/server.zip")?.use { stream ->
-        project.zipTree(project.file("temp.zip").apply { writeBytes(stream.readBytes()) })
-          .let { tree -> project.copy { it.from(tree); it.into(serverRunDir) } }
-          .also { project.delete("temp.zip") }
-      }
-    }
+        val serverRunDir = project.file(devserverDir)
+        if (serverRunDir.mkdirs()) {
+            javaClass.getResourceAsStream("/server.zip")?.use { stream ->
+                project.zipTree(project.file("temp.zip").apply { writeBytes(stream.readBytes()) })
+                    .let { tree -> project.copy { it.from(tree); it.into(serverRunDir) } }
+                    .also { project.delete("temp.zip") }
+            }
+        }
 
-    val rootProject = project.gradle.rootProject
+        val rootProject = project.gradle.rootProject
 
-    fun createServerRunArguments(): String {
-      val assetsPath =
-        "${hytale.homePath}/install/${hytale.patchline}/package/game/latest/Assets.zip"
-      var params =
-        "--allow-op --disable-sentry --accept-early-plugins --assets=\"$assetsPath\""
-      val modPaths = mutableListOf<String>()
-      val language = if (project.extraProperties.has("kotlin")) Language.KOTLIN else Language.JAVA
-      val srcDir = when (language) {
-        Language.KOTLIN -> project.extensions.getByType(KotlinJvmProjectExtension::class.java).sourceSets
-          .getByName("main").kotlin.srcDirs.first().parentFile.absolutePath
-
-        Language.JAVA -> project.extensions.getByType(SourceSetContainer::class.java)
-          .getByName("main").java.srcDirs.first().parentFile.absolutePath
-      }
-      modPaths.add(srcDir)
-      // TODO: Parse hytale config argument
-      // if (loadUserMods) {
-      //    modPaths.add("${hytale.homePath}/UserData/Mods")
-      //}
-      params += " --mods=\"${modPaths.joinToString(",")}\""
-      return params
-    }
+        fun createServerRunArguments(): String {
+            val assetsPath =
+                "${hytale.homePath}/install/${hytale.patchline}/package/game/latest/Assets.zip"
+            var params =
+                "--allow-op --disable-sentry --accept-early-plugins --assets=\"$assetsPath\""
+            val modPaths = mutableListOf<String>()
+            val language = if (project.extra["kotlin"] != null) Language.KOTLIN else Language.JAVA
+            val srcDir = when (language) {
+                Language.KOTLIN -> project.extensions.getByType(KotlinJvmProjectExtension::class.java).sourceSets
+                    .getByName("main").kotlin.srcDirs.first().parentFile.absolutePath
+                Language.JAVA -> project.extensions.getByType(SourceSetContainer::class.java)
+                    .getByName("main").java.srcDirs.first().parentFile.absolutePath
+            }
+            modPaths.add(srcDir)
+            // TODO: Parse hytale config argument
+            // if (loadUserMods) {
+            //    modPaths.add("${hytale.homePath}/UserData/Mods")
+            //}
+            params += " --mods=\"${modPaths.joinToString(",")}\""
+            return params
+        }
 
     project.afterEvaluate {
       rootProject.plugins.apply(IdeaExtPlugin::class.java)
@@ -83,6 +82,6 @@ class HytaleDevserverRun : Gradle.ConfigureIdeaDev {
       }
     }
 
-    return this
-  }
+        return this
+    }
 }
