@@ -105,7 +105,7 @@ class ToolchainManager : Gradle.ConfigureToolchain {
         }
 
         project.tasks.withType(JavaCompile::class.java).configureEach {
-            it.options.release.set(24)  // TODO: Expose the version as a configuration
+            it.options.release.set(25)  // TODO: Expose the version as a configuration
         }
     }
 
@@ -125,7 +125,7 @@ class ToolchainManager : Gradle.ConfigureToolchain {
         }
 
         project.tasks.withType(KotlinCompile::class.java).configureEach {
-            it.compilerOptions.jvmTarget.set(JvmTarget.JVM_24) // TODO: Expose the version as a configuration
+            it.compilerOptions.jvmTarget.set(JvmTarget.JVM_25) // TODO: Expose the version as a configuration
         }
     }
 }
