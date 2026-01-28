@@ -5,14 +5,29 @@ flexible framework for mod development for Hytale, _and later for Minecraft._
 
 ## Features
 
-- MavenCentral and CurseMaven are automatically registered and ready to use
-- Hytale server dependencies using the official HytaleMaven ready to use
-- Monorepo support through common "multiloader" and "library" patterns
-- Mixed Kotlin and Java projects with automatic dependencies
-- Auto-create IDEA run configuration for JetBrains DCEVM hot swapping
-- Hot-reload plugin (even with dependencies) via an agent using DCEVM
-- Direct source linking (no copy-paste) with the devserver
-- Configured to compile Sources and Javadocs for your publications
+- **Zero-boilerplate Gradle**: Configure everything from settings or build — your choice.
+- **Batteries included**: MavenCentral, CurseMaven, HytaleMaven auto-wired, ready to use!
+- **First-class Hytale support**: Fully typed manifest, nested SubPlugins, in-place generation.
+- **Pre-configured devserver**: Creative superflat, encrypted store, authorize only once.
+- **Monorepo & multiloader ready**: `common {}` + `hytale {}` = automatic workspace linking.
+- **Kotlin & Java seamlessly**: Java pre-configured, and `useKotlin()`availabe to switch to Kotlin!
+- **Flat layout support**: Skip `main/java/package` path via `useFlat()` without affecting jars.
+- **Fast development loop**: `DCEVM` hot-reload (via IDE with agent) with auto IDEA configuration!
+- **Agent-based hot-reload**: Runtime mod lifecycle reloads for extending code hot swapping.
+- **True source linking**: DevServer & AssetEditor uses your sources; no copy, instant feedback.
+- **Testing included**: JUnit or Kotest with coverage reporting out of the box.
+
+_and 🚧 coming soon:_
+
+- _All toggles exposed: Every argument, every version, fully exposed for customization._
+- _SDK configuration: Provide the DCEVM-ready environment for even fewer steps to get started._
+- _Hytale sources: Decompilation for IntelliSense without affecting builds._
+
+<!-- 
+- *VSCode & Neovim support*: Auto-configure popular alternative development environments.
+- *Publishing to CurseForge*: Remove one more obstacle to distribute your mod.
+- *CI/CI integration*: Generate your first pipeline for automation.
+-->
 
 ## Requirements
 
@@ -20,13 +35,13 @@ flexible framework for mod development for Hytale, _and later for Minecraft._
 - Java 25, use JetBrains Runtime (JBR) for hot swapping to work!
 - Hytale installed through the launcher when used as the target
 
-## Usage
+# Usage
 
 ```kotlin
 // settings.gradle.kts
 rootProject.name = "dev.example"
 plugins {
-    id("dev.scaffoldit") version "0.1.15"
+    id("dev.scaffoldit") version "0.2.0"
 }
 hytale {
     manifest {
@@ -36,25 +51,20 @@ hytale {
         IncludesAssetPack = true
     }
 }
-// that's it, no build.gradle.kts needed (but the same can be done there)
 ```
 
-### `common { }`
-
-_Available both in `settings.gradle[.kts]` and `build.gradle[.kts]` scripts!_
-
-> [!IMPORTANT]
-> This is meant to be declared before platform-related blocks!
+## `common { }`
 
 Collects and configures common library packages and adds them to the target projects as
 dependencies. All `include()` projects are relative from the `common` directory. It automatically
 creates the necessary folder structure but leaves the classes itself to you.
 
-##### `projectDir: String`
+#### `projectDir: String`
 
-Configures the base project directory, set to `common` here.
+Configures the parent directory for the `common` workspaces, by default, it is set to `common`,
+reset it with an empty string to simply create all your projects in the repository root.
 
-##### `repositories {}`, `dependencies {}`,  `include(...projectString)`, `include(projectString)`
+#### `repositories {}`, `dependencies {}`,  `include(...projectString)`, `include(projectString)`
 
 Exposes the standard dependency management and project declaration where you can share the repos
 and libraries with all projects and declare any number of groups with their shared repos and
@@ -74,15 +84,33 @@ common {
 }
 ```
 
-### `hytale { }`
+### `useKotlin(dependencyString)`
 
-_Available both in `settings.gradle[.kts]` and `build.gradle[.kts]` scripts!_
+Use and specify the Kotlin STDLib for compilation, left alone it will import the standard
+`org.jetbrains.kotlin:kotlin-stdlib` but you can specify your own version, such as anything already
+distributed on the curse maven.
+
+This function sets the `kotlin: String?` property, so if you prefer, you can also simply assign your
+stdlib using `kotlin = "my.kotlin.srdlib"`.
+
+### `useFlat()`
+
+Switch the directory layout to flat that drops `main/com/example/project`, this is useful for Kotlin
+as it reduces the complexity of the project structure and the compiler still re-creates that within
+your built jar file.
+
+## `hytale { }`
 
 Configures a hytale project with dependencies, manifest management, and inherits common packages
 when they are declared. It automatically creates the necessary folder structure but leaves the
 classes itself to you.
 
-##### `repositories {}`, `dependencies {}`,  `include(...projectString)`, `include(projectString)`
+#### `projectDir: String`
+
+Configures the parent directory for the `hytale` workspaces, by default, it is set to `hytale`,
+reset it with an empty string to simply create all your projects in the repository root.
+
+#### `repositories {}`, `dependencies {}`,  `include(...projectString)`, `include(projectString)`
 
 Exposes the standard dependency management and project declaration where you can share the repos
 and libraries with all projects and declare any number of groups with their shared repos and
@@ -102,19 +130,22 @@ hytale {
 }
 ```
 
-##### `useKotlin(dependencyString)`
+### `useKotlin(dependencyString)`
 
 Use and specify the Kotlin STDLib for compilation, left alone it will import the standard
 `org.jetbrains.kotlin:kotlin-stdlib` but you can specify your own version, such as anything already
 distributed on the curse maven.
 
-##### `useFlat()`
+This function sets the `kotlin: String?` property, so if you prefer, you can also simply assign your
+stdlib using `kotlin = "my.kotlin.srdlib"`.
+
+### `useFlat()`
 
 Switch the directory layout to flat that drops `main/com/example/project`, this is useful for Kotlin
 as it reduces the complexity of the project structure and the compiler still re-creates that within
 your built jar file.
 
-##### `manifest { }`
+#### `manifest { }`
 
 - `Group: String`: Group identifier, typically the organization in one PascalCase word.
 - `Name: String`: Plugin name, typically in one PascalCase word, displayed in the mods list.
@@ -131,7 +162,13 @@ your built jar file.
 - `Main: String`: Your main class full name to be loaded from classpath.
 - `SubPlugins: List<HytaleManifest>?`: Same manifest as above to configure any sub-plugins.
 
-### Hot Swapping
+Where the `Author` accepts:
+
+- `Name: String`: the display name shown in the mods list.
+- `Website: String?`: Optional field, not shown anywhere for now.
+- `Email: String?`: Optional field, not shown anywhere for now.
+
+## Hot Swapping
 
 To enable dynamic class reloading at runtime, you MUST use a JetBrains JRE, which is available for
 free at https://github.com/JetBrains/JetBrainsRuntime, or you can manage it within the IDEA SDK
@@ -144,7 +181,7 @@ only need this agent, you can use it by adding:
 
 ```kotlin
 dependencies {
-    runtimeOnly("dev.scaffoldit:devtools:0.1.15")
+    runtimeOnly("dev.scaffoldit:devtools:0.2.0")
 }
 ```
 
