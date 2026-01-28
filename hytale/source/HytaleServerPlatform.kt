@@ -25,9 +25,6 @@ class HytaleServerPlatform : Gradle.ConfigurePlatform {
                 "runtimeOnly",
                 "dev.scaffoldit:devtools:${VERSION}"
             )
-            project.gradle.allprojects { lib ->
-                add("implementation", lib)
-            }
         }
 
         with(project.tasks) {

@@ -27,7 +27,6 @@ class ToolchainManager : Gradle.ConfigureToolchain {
     override fun useKotlin(dependencyNotation: String?) {
         kotlin = dependencyNotation ?: "org.jetbrains.kotlin:kotlin-stdlib"
         log.lifecycle("ToolchainManager.useKotlin($kotlin)")
-        if(::project.isInitialized) configureKotlin()
     }
 
     private var pendingRepositoryChanges: (RepositoryHandler.() -> Unit)? = null
@@ -81,7 +80,11 @@ class ToolchainManager : Gradle.ConfigureToolchain {
 
     private fun configurePlugins() {
         with(project.pluginManager) {
-            apply("java-library")
+            if (kotlin !== null) {
+                apply("org.jetbrains.kotlin.jvm")
+            } else {
+                apply("java-library")
+            }
             apply("org.gradle.maven-publish")
             apply("org.gradle.signing")
         }
@@ -111,10 +114,6 @@ class ToolchainManager : Gradle.ConfigureToolchain {
 
     private fun configureKotlin() {
         if (kotlin === null) return
-
-        with(project.pluginManager) {
-            apply("org.jetbrains.kotlin.jvm")
-        }
 
         with(project.dependencies) {
             add("implementation", kotlin as String)
