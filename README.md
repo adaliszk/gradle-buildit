@@ -42,7 +42,7 @@ _and coming soon:_
 // settings.gradle.kts
 rootProject.name = "dev.example"
 plugins {
-    id("dev.scaffoldit") version "0.2.2"
+    id("dev.scaffoldit") version "0.2.3"
 }
 hytale {
     manifest {
@@ -111,7 +111,7 @@ classes itself to you.
 Configures the parent directory for the `hytale` workspaces, by default, it is set to `hytale`,
 reset it with an empty string to simply create all your projects in the repository root.
 
-#### `patchline: Patchline.RELEASE`, `version: String`
+#### `usePatchline(String)`, `patchline = Patchline`, `version: String`
 
 Configure which patchline from maven to depend on and within that which version. By default, it will
 use the RELEASE patchline with the "+" version, which means the latest.
