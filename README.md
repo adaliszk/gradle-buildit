@@ -193,6 +193,16 @@ Scaffoldit also ships Agent Plugin that at runtime detects the Hot Swapping and 
 automatically for you; with that you only need to click on "Code Changed" in the editor UI. If you
 only need this agent, you can use it by adding:
 
+```kotlin
+dependencies {
+    runtimeOnly("dev.scaffoldit:devtools:0.2.3")
+}
+```
+
+> [!NOTE]
+> You only need this if you do not use the ScaffoldIt Plugin itself!
+
+
 ## Under the hood toggles
 
 While the plugin sets up a complete development environment, you can fine-tune that by setting
@@ -224,12 +234,6 @@ env.hytale.devServerDCEVM=true
 env.hytale.devServerHotReload=true
 env.hytale.manifestGenerator=true
 env.hytale.configureIdea=true
-```
-
-```kotlin
-dependencies {
-    runtimeOnly("dev.scaffoldit:devtools:0.2.3")
-}
 ```
 
 # Contributions
