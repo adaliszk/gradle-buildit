@@ -8,7 +8,7 @@ plugins {
 
 allprojects {
     group = "dev.scaffoldit"
-    version = "0.2.3"
+    version = "0.2.4"
 }
 
 subprojects {

@@ -150,13 +150,18 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
     }
 
     private fun resolveAssets(): File? {
-        val pathline = HytaleExtension.patchline
+        val patchline = HytaleExtension.patchline
         val version = HytaleExtension.version.replace("+", "latest")
-        val installPath = homePath.resolve("install/$pathline/package/game/$version/Assets.zip")
+
         val downloadPath = homePath.resolve("$version/Assets.zip")
+        log.lifecycle("> Hytale :${project.name}.downloadPath: ${downloadPath.canonicalPath}")
+
+        val installPath = homePath.resolve("install/$patchline/package/game/$version/Assets.zip")
+        log.lifecycle("> Hytale :${project.name}.installPath: ${installPath.canonicalPath}")
+
         return when (true) {
-            installPath.exists() -> installPath
             downloadPath.exists() -> downloadPath
+            installPath.exists() -> installPath
             else -> null
         }
     }
@@ -219,7 +224,7 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
                         config.mainClass = "com.hypixel.hytale.Main"
                         config.moduleName = "${mainPackage}.main".removePrefix(".")
                         config.programParameters = createServerRunArguments()
-                        config.workingDirectory = project.projectDir.absolutePath
+                        config.workingDirectory = project.file(devserverDir).absolutePath
                         if (devServerDCEVM) {
                             config.jvmArgs = "-XX:+AllowEnhancedClassRedefinition"
                         }
