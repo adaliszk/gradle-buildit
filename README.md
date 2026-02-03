@@ -66,7 +66,7 @@ This will expose several Gradle commands under the "hytale" group:
 # Configuration
 
 Everything is supported in the `settings.gradle[.kts]`, but includes are not possible in
-`build.gradle[.kts]` so the recommendation is to confiugre everything in one file:
+`build.gradle[.kts]` so the recommendation is to configure everything in one file:
 
 ## `common { }`
 
