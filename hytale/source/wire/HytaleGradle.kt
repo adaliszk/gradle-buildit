@@ -15,7 +15,7 @@ object HytaleGradle {
 
         var version: String
         fun useVersion(version: String) {
-            this.version = version
+            this.version = version.replace("latest", "+")
         }
 
         fun manifest(config: HytaleManifest.() -> Unit)
