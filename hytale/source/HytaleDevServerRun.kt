@@ -52,20 +52,19 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
         registerSetupTask()
         registerRunTask()
 
-        val mainPackage: String = "${project.group}.${project.name}"
-            .replace("-", ".")
-            .replace("_", ".")
-            .lowercase()
+        val manifest = HytaleManifest.from(project)
+        val mainPackage = manifest.Main?.substringBeforeLast(".")
+            ?: "${project.group}.${project.name}".replace(":", ".").trim('.')
 
-        project.afterEvaluate {
-            if (it.path !== project.path) return@afterEvaluate
+        project.afterEvaluate { scope ->
+            if (scope.path !== project.path) return@afterEvaluate
 
             with(project.gradle.rootProject) {
                 plugins.apply(IdeaExtPlugin::class.java)
                 extensions.configure<IdeaModel>("idea") { idea ->
                     idea.project.settings.runConfigurations {
                         val config = withType(Application::class.java).firstOrNull {
-                            it.moduleName == "${mainPackage}.main".removePrefix(".")
+                            it.moduleName == "${mainPackage}.main"
                         }
 
                         if (config == null) {
@@ -120,10 +119,6 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
             if (devserver?.Enabled == false) return@afterEvaluate // Feature-flag
 
             val serverRunDir = project.file(devserverDir)
-            if (serverRunDir.exists()) {
-                serverRunDir.deleteRecursively()
-            }
-
             if (serverRunDir.mkdirs()) {
                 javaClass.getResourceAsStream("/server.zip")?.use { stream ->
                     project.zipTree(
