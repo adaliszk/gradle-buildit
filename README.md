@@ -55,6 +55,19 @@ hytale {
 }
 ```
 
+This will expose several Gradle commands under the "hytale" group:
+
+| Command                    | Description                                                                                               |
+|:---------------------------|:----------------------------------------------------------------------------------------------------------|
+| `gradlew setupServer`      | (Re-)Create the the devserver within the project, watch out, re-running this deletes the existing server! |
+| `gradlew runServer`        | Runs the devserver, use -Ddebug for opening a debugger and allow hot-swapping                             |
+| `gradlew generateManifest` | Generate the plugin manifest from settings and existing values. This is automatically done during build.  |
+
+# Configuration
+
+Everything is supported in the `settings.gradle[.kts]`, but includes are not possible in
+`build.gradle[.kts]` so the recommendation is to confiugre everything in one file:
+
 ## `common { }`
 
 Collects and configures common library packages and adds them to the target projects as
@@ -202,7 +215,6 @@ dependencies {
 
 > [!NOTE]
 > You only need this if you do not use the ScaffoldIt Plugin itself!
-
 
 ## Under the hood toggles
 
