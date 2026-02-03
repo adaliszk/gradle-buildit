@@ -43,7 +43,7 @@ _and coming soon:_
 // settings.gradle.kts
 rootProject.name = "dev.example"
 plugins {
-    id("dev.scaffoldit") version "0.2.3"
+    id("dev.scaffoldit") version "0.2.4"
 }
 hytale {
     manifest {
@@ -196,7 +196,7 @@ only need this agent, you can use it by adding:
 
 ```kotlin
 dependencies {
-    runtimeOnly("dev.scaffoldit:devtools:0.2.3")
+    runtimeOnly("dev.scaffoldit:devtools:0.2.4")
 }
 ```
 
