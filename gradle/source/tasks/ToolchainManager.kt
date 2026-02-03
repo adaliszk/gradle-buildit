@@ -26,7 +26,8 @@ class ToolchainManager : Gradle.ConfigureToolchain {
     /** Use kotlin for this scope, use internal or external, your choice. */
     override fun useKotlin(dependencyNotation: String?) {
         kotlin = dependencyNotation ?: "org.jetbrains.kotlin:kotlin-stdlib"
-        log.lifecycle("ToolchainManager.useKotlin($kotlin)")
+        log.debug("ToolchainManager.useKotlin($kotlin)")
+        if (::project.isInitialized) configureKotlin()
     }
 
     private var pendingRepositoryChanges: (RepositoryHandler.() -> Unit)? = null
@@ -56,11 +57,12 @@ class ToolchainManager : Gradle.ConfigureToolchain {
 
         configurePlugins()
         configureRepositories()
+        configureToolchain()
+        configureKotlin()
         includeWorkspacePackages()
         pendingRepositoryChanges?.let { project.repositories.apply(it) }
         pendingDependencyChanges?.let { project.dependencies.apply(it) }
-        configureToolchain()
-        configureKotlin()
+        includeTestingKit()
 
         return this
     }
@@ -80,13 +82,65 @@ class ToolchainManager : Gradle.ConfigureToolchain {
 
     private fun configurePlugins() {
         with(project.pluginManager) {
-            if (kotlin !== null) {
-                apply("org.jetbrains.kotlin.jvm")
-            } else {
-                apply("java-library")
-            }
+            apply("java-library")
             apply("org.gradle.maven-publish")
             apply("org.gradle.signing")
+        }
+    }
+
+    private fun configureToolchain() {
+        with(project.extensions) {
+            configure(JavaPluginExtension::class.java) { ext ->
+                ext.toolchain.languageVersion.set(
+                    JavaLanguageVersion.of(
+                        project.providers
+                            .gradleProperty("env.java.version")
+                            .getOrElse("25")
+                            .toInt()
+                    )
+                )
+                ext.withSourcesJar()
+                ext.withJavadocJar()
+            }
+        }
+
+        project.tasks.withType(JavaCompile::class.java).configureEach {
+            it.options.release.set(
+                project.providers
+                    .gradleProperty("env.java.version")
+                    .getOrElse("25")
+                    .toInt()
+            )
+        }
+    }
+
+    private fun configureKotlin() {
+        if (kotlin === null) return
+
+        with(project.pluginManager) {
+            apply("org.jetbrains.kotlin.jvm")
+        }
+
+        with(project.dependencies) {
+            add("implementation", kotlin as String)
+        }
+
+        project.afterEvaluate {
+            project.extensions.configure<KotlinJvmProjectExtension>("kotlin") {
+                it.jvmToolchain(
+                    project.providers
+                        .gradleProperty("env.java.version")
+                        .getOrElse("25")
+                        .toInt()
+                )
+            }
+            project.tasks.withType(KotlinCompile::class.java).configureEach {
+                val version = project.providers
+                    .gradleProperty("env.java.version")
+                    .getOrElse("25")
+                    .toInt()
+                it.compilerOptions.jvmTarget.set(JvmTarget.valueOf("JVM_$version"))
+            }
         }
     }
 
@@ -98,33 +152,7 @@ class ToolchainManager : Gradle.ConfigureToolchain {
         }
     }
 
-    private fun configureToolchain() {
-        with(project.extensions) {
-            configure(JavaPluginExtension::class.java) { ext ->
-                ext.toolchain.languageVersion.set(JavaLanguageVersion.of(25)) // TODO: Expose the version as a configuration
-                ext.withSourcesJar()
-                ext.withJavadocJar()
-            }
-        }
+    private fun includeTestingKit() {
 
-        project.tasks.withType(JavaCompile::class.java).configureEach {
-            it.options.release.set(25)  // TODO: Expose the version as a configuration
-        }
-    }
-
-    private fun configureKotlin() {
-        if (kotlin === null) return
-
-        with(project.dependencies) {
-            add("implementation", kotlin as String)
-        }
-
-        project.extensions.configure<KotlinJvmProjectExtension>("kotlin") {
-            it.jvmToolchain(25)  // TODO: Expose the version as a configuration
-        }
-
-        project.tasks.withType(KotlinCompile::class.java).configureEach {
-            it.compilerOptions.jvmTarget.set(JvmTarget.JVM_25) // TODO: Expose the version as a configuration
-        }
     }
 }

@@ -9,19 +9,27 @@ import dev.scaffoldit.gradle.GradleConsole
 import dev.scaffoldit.gradle.tasks.SourceManager
 import dev.scaffoldit.gradle.tasks.TestingEngine
 import dev.scaffoldit.gradle.tasks.ToolchainManager
+import dev.scaffoldit.hytale.wire.HytaleGradle
+import dev.scaffoldit.hytale.wire.HytaleManifest
+import org.gradle.api.Action
 import org.gradle.api.Project
-import java.io.File
 import org.gradle.api.logging.Logger as InGradle
 
 abstract class HytaleExtension :
     Gradle.ConfigureToolchain by ToolchainManager(),
     Gradle.ConfigurePaths by SourceManager(),
     Gradle.ConfigureTests by TestingEngine(),
-    Gradle.ConfigurePlatform by HytaleServerPlatform(),
-    Gradle.ConfigureIdeaDev by HytaleDevserverRun(),
+    HytaleGradle.ConfigurePlatform by HytaleServerPlatform(),
+    HytaleGradle.ConfigureIdeaDev by HytaleDevServerRun(),
     Logging<InGradle> by GradleConsole(),
     Wired by ScaffoldIt(),
     Extension {
+
+    companion object {
+        // Configuration for Hytale
+        var patchline: String = "release"
+        var version: String = "+"
+    }
 
     internal val pfx: String = "> Plug "
 
@@ -31,40 +39,25 @@ abstract class HytaleExtension :
         wire(this)
     }
 
-    internal var pendingManifest: (HytaleManifest.() -> Unit)? = null
-
-    @Suppress("unused") // Exposed for Gradle scripts
-    fun manifest(config: HytaleManifest.() -> Unit) {
-        log.lifecycle("$pfx:$projectDir:manifest()")
-        pendingManifest = config
-    }
-
     internal fun resolveProjectPath(subDir: String): Pair<String, String> {
         val dir = ":$subDir".replace("::", ":")
         val path = dir.trim(':').replace(':', '/')
         return dir to path
     }
 
-    internal fun configureRootProject(project: Project) {
-        projectDir = ""
-        configureProject(project)
-    }
-
     internal fun configureProject(project: Project) {
         log.lifecycle("$pfx:hytale:configureProject(${project.name})")
 
-        with(SourceManager::class).projectDir = projectDir
         with(ToolchainManager::class).configure(project)
-        with(SourceManager::class)
-            .withKotlin(with(ToolchainManager::class).kotlin)
-            .configure(project)
+        with(SourceManager::class).configure(project, parent)
         with(TestingEngine::class).configure(project)
-        with(HytaleServerPlatform::class).configure(project)
-        with(HytaleDevserverRun::class).configure(project)
 
-        pendingManifest?.let { config ->
-            HytaleManifest.from(project).apply(config).configure(project)
-            HytaleManifest.from(project).saveTo(project)
-        }
+        // TODO: Figure out how not to cast here
+        with(HytaleServerPlatform::class).configure(
+            project, parent as HytaleGradle.ConfigurePlatform
+        )
+        with(HytaleDevServerRun::class).configure(
+            project, parent as Gradle.ConfigureToolchain
+        )
     }
 }

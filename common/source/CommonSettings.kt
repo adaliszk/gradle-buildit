@@ -20,14 +20,14 @@ open class CommonSettings(protected val settings: Settings) :
 
     init {
         val rootDir = settings.rootDir.resolve(projectDir)
-        log.lifecycle("$pfx:common(settings):initialize with ${rootDir.canonicalPath}")
+        log.lifecycle("$pfx:common(settings):initialize in $rootDir with ${NestedProjects.included}")
         with(NestedProjects::class).projectDir = projectDir
 
         settings.gradle.settingsEvaluated {
             if (!rootDir.exists()) return@settingsEvaluated
-            log.lifecycle("$pfx:common(settings):settingsEvaluated with ${NestedProjects.included}")
+            log.lifecycle("$pfx:common(settings):settingsEvaluated with ${NestedProjects.withPrefix(projectDir)}")
             settings.include(":$projectDir")
-            NestedProjects.included.forEach { subProjectDir ->
+            NestedProjects.withPrefix(projectDir).forEach { subProjectDir ->
                 val (dir, path) = resolveProject(subProjectDir)
                 settings.rootDir.resolve(path).mkdirs()
                 settings.include(dir)
@@ -36,12 +36,12 @@ open class CommonSettings(protected val settings: Settings) :
 
         settings.gradle.projectsLoaded {
             if (!rootDir.exists()) return@projectsLoaded
-            log.lifecycle("$pfx:common(settings):projectsLoaded with ${NestedProjects.included}")
-            if (NestedProjects.included.isEmpty()) {
+            log.lifecycle("$pfx:common(settings):projectsLoaded with ${NestedProjects.withPrefix(projectDir)}")
+            if (NestedProjects.withPrefix(projectDir).isEmpty()) {
                 configureProject(settings.gradle.rootProject.project(projectDir))
                 return@projectsLoaded
             }
-            NestedProjects.included.forEach { subProjectDir ->
+            NestedProjects.withPrefix(projectDir).forEach { subProjectDir ->
                 val (dir, path) = resolveProject(subProjectDir)
                 configureProject(settings.gradle.rootProject.project(dir))
             }

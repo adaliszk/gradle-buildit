@@ -20,13 +20,19 @@ open class HytaleSettings(protected val settings: Settings) :
     override var projectDir: String = "hytale"
 
     init {
+        val rootDir = settings.rootDir.resolve(projectDir)
+        log.lifecycle("$pfx:hytale(settings):initialize in $rootDir with ${NestedProjects.included}")
         with(NestedProjects::class).projectDir = projectDir
 
         settings.gradle.settingsEvaluated {
-            log.lifecycle("$pfx:hytale(settings):settingsEvaluated with ${NestedProjects.included}")
+            log.lifecycle("$pfx:hytale(settings):settingsEvaluated with ${NestedProjects.withPrefix(projectDir)}")
             when (true) {
-                NestedProjects.included.isEmpty() -> projectDir = ""
-                else -> NestedProjects.included.forEach { subProjectDir ->
+                NestedProjects.withPrefix(projectDir).isEmpty() ->  {
+                    log.lifecycle("$pfx:hytale(settings):projectDir=''")
+                    with(NestedProjects::class).projectDir = ""
+                    projectDir = ""
+                }
+                else -> NestedProjects.withPrefix(projectDir).forEach { subProjectDir ->
                     val (dir, path) = resolveProjectPath(subProjectDir)
                     val targetPath = settings.rootDir.resolve(path).also { it.mkdirs() }
                     settings.include(dir)
@@ -35,10 +41,10 @@ open class HytaleSettings(protected val settings: Settings) :
         }
 
         settings.gradle.projectsLoaded {
-            log.lifecycle("$pfx:hytale(settings):projectsLoaded with ${NestedProjects.included}")
+            log.lifecycle("$pfx:hytale(settings):projectsLoaded with ${NestedProjects.withPrefix(projectDir)}")
             when (true) {
-                NestedProjects.included.isEmpty() -> configureRootProject(settings.gradle.rootProject)
-                else -> NestedProjects.included.forEach { subProjectDir ->
+                NestedProjects.withPrefix(projectDir).isEmpty() -> configureProject(settings.gradle.rootProject)
+                else -> NestedProjects.withPrefix(projectDir).forEach { subProjectDir ->
                     val (dir, _) = resolveProjectPath(subProjectDir)
                     configureProject(settings.gradle.rootProject.project(dir))
                 }

@@ -1,6 +1,5 @@
 package dev.scaffoldit.test.e2e
 
-import dev.scaffoldit.gradle.tasks.NestedProjects
 import dev.scaffoldit.test.*
 import io.kotest.core.spec.IsolationMode
 import io.kotest.core.spec.style.FunSpec
@@ -10,6 +9,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
 import org.gradle.testkit.runner.TaskOutcome
+import java.io.File
 
 
 class HytaleOnlyScriptSpec : FunSpec({
@@ -22,7 +22,7 @@ class HytaleOnlyScriptSpec : FunSpec({
             plugins {
                 id("dev.scaffoldit")
             }
-            #extensionName# {
+            hytale {
                 // Nothing configured
             } 
         """.trimIndent(),
@@ -47,11 +47,11 @@ class HytaleOnlyScriptSpec : FunSpec({
             plugins {
                 id("dev.scaffoldit")
             }
-            #extensionName# {
+            hytale {
                 useKotlin()
             } 
         """.trimIndent(),
-        listOf("projects"),
+        listOf("projects", "--stacktrace"),
     ) { rootDir, _, result, _ ->
         result.task(":projects")?.outcome shouldBe TaskOutcome.SUCCESS
         result.output shouldContain "No sub-projects"
@@ -73,7 +73,7 @@ class HytaleOnlyScriptSpec : FunSpec({
             plugins {
                 id("dev.scaffoldit")
             }
-            #extensionName# {
+            hytale {
                 useFlat()
             } 
         """.trimIndent(),
@@ -82,7 +82,6 @@ class HytaleOnlyScriptSpec : FunSpec({
         result.task(":projects")?.outcome shouldBe TaskOutcome.SUCCESS
         result.output shouldContain "No sub-projects"
 
-        rootDir.resolve("assets").shouldExist()
         rootDir.resolve("assets").shouldExist()
         rootDir.resolve("resources").shouldExist()
         rootDir.resolve("source").shouldExist()
@@ -95,35 +94,133 @@ class HytaleOnlyScriptSpec : FunSpec({
         rootDir.resolve("src/test/kotlin").shouldNotExist()
     }
 
-    testEachWithGradle(
-        "no configuration with single include()",
-        HYTALE_SETTINGS,
-        """
-            plugins {
-                id("dev.scaffoldit")
-            }
-            #extensionName# {
-                include("#randomName#")
-            } 
-        """.trimIndent(),
-        listOf("projects", "--stacktrace"),
-    ) { rootDir, case, result, randomArgs ->
-        result.task(":projects")?.outcome shouldBe TaskOutcome.SUCCESS
-        result.output shouldNotContain "No sub-projects"
-
+    fun assertRootSkipped(rootDir: File) {
         rootDir.resolve("assets").shouldExist()
+        rootDir.resolve("resources").shouldNotExist()
+        rootDir.resolve("source").shouldNotExist()
         rootDir.resolve("src/main/resources").shouldNotExist()
         rootDir.resolve("src/main/kotlin").shouldNotExist()
         rootDir.resolve("src/test/resources").shouldNotExist()
         rootDir.resolve("src/test/kotlin").shouldNotExist()
         rootDir.resolve("src/main/java").shouldNotExist()
         rootDir.resolve("src/test/java").shouldNotExist()
+    }
+
+    fun assertWorkspace(rootDir: File, name: String) {
+        rootDir.resolve("hytale/$name/src/main/resources").shouldExist()
+        rootDir.resolve("hytale/$name/src/main/java").shouldExist()
+        rootDir.resolve("hytale/$name/src/test/resources").shouldExist()
+        rootDir.resolve("hytale/$name/src/test/java").shouldExist()
+        rootDir.resolve("hytale/hytale").shouldNotExist()
+        rootDir.resolve("hytale/$name/hytale").shouldNotExist()
+        rootDir.resolve("hytale/$name/src/hytale").shouldNotExist()
+    }
+
+    testEachWithGradle(
+        "with single include() using single value",
+        HYTALE_SETTINGS,
+        """
+            plugins {
+                id("dev.scaffoldit")
+            }
+            hytale {
+                include("#randomName#")
+            } 
+        """.trimIndent(),
+        listOf("projects", "--stacktrace"),
+        {
+            it.resolve("common").mkdirs()
+        }
+    ) { rootDir, _, result, randomArgs ->
+        result.task(":projects")?.outcome shouldBe TaskOutcome.SUCCESS
+        result.output shouldNotContain "No sub-projects"
 
         randomArgs.forEach { randomName ->
-            rootDir.resolve("${case.extensionName}/$randomName/src/main/resources").shouldExist()
-            rootDir.resolve("${case.extensionName}/$randomName/src/main/java").shouldExist()
-            rootDir.resolve("${case.extensionName}/$randomName/src/test/resources").shouldExist()
-            rootDir.resolve("${case.extensionName}/$randomName/src/test/java").shouldExist()
+            assertWorkspace(rootDir, randomName)
         }
+
+        assertRootSkipped(rootDir)
+    }
+
+    testEachWithGradle(
+        "with single include() using multiple values",
+        HYTALE_SETTINGS,
+        """
+            plugins {
+                id("dev.scaffoldit")
+            }
+            hytale {
+                include("#randomName#", "#randomName#", "#randomName#")
+            } 
+        """.trimIndent(),
+        listOf("projects", "--stacktrace"),
+        {
+            it.resolve("common").mkdirs()
+        }
+    ) { rootDir, _, result, randomArgs ->
+        result.task(":projects")?.outcome shouldBe TaskOutcome.SUCCESS
+        result.output shouldNotContain "No sub-projects"
+
+        randomArgs.forEach { randomName ->
+            assertWorkspace(rootDir, randomName)
+        }
+
+        assertRootSkipped(rootDir)
+    }
+
+    testEachWithGradle(
+        "with multiple include() using single values",
+        HYTALE_SETTINGS,
+        """
+            plugins {
+                id("dev.scaffoldit")
+            }
+            hytale {
+                include("#randomName#")
+                include("#randomName#")
+                include("#randomName#")
+            } 
+        """.trimIndent(),
+        listOf("projects", "--stacktrace"),
+        {
+            it.resolve("common").mkdirs()
+        }
+    ) { rootDir, _, result, randomArgs ->
+        result.task(":projects")?.outcome shouldBe TaskOutcome.SUCCESS
+        result.output shouldNotContain "No sub-projects"
+
+        randomArgs.forEach { randomName ->
+            assertWorkspace(rootDir, randomName)
+        }
+
+        assertRootSkipped(rootDir)
+    }
+
+    testEachWithGradle(
+        "with multiple include() using multiple values",
+        HYTALE_SETTINGS,
+        """
+            plugins {
+                id("dev.scaffoldit")
+            }
+            hytale {
+                include("#randomName#", "#randomName#", "#randomName#")
+                include("#randomName#", "#randomName#", "#randomName#")
+                include("#randomName#", "#randomName#", "#randomName#")
+            } 
+        """.trimIndent(),
+        listOf("projects", "--stacktrace"),
+        {
+            it.resolve("common").mkdirs()
+        }
+    ) { rootDir, _, result, randomArgs ->
+        result.task(":projects")?.outcome shouldBe TaskOutcome.SUCCESS
+        result.output shouldNotContain "No sub-projects"
+
+        randomArgs.forEach { randomName ->
+            assertWorkspace(rootDir, randomName)
+        }
+
+        assertRootSkipped(rootDir)
     }
 })

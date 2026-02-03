@@ -5,26 +5,27 @@ flexible framework for mod development for Hytale, _and later for Minecraft._
 
 ## Features
 
-- **Zero-boilerplate Gradle**: Configure everything from settings or build — your choice.
+- **Zero-boilerplate Gradle**: Configure everything from settings or build, kotlin or groovy.
+- **All toggles exposed**: Every argument, every version, fully exposed for customization.
 - **Batteries included**: MavenCentral, CurseMaven, HytaleMaven auto-wired, ready to use!
 - **First-class Hytale support**: Fully typed manifest, nested SubPlugins, in-place generation.
 - **Pre-configured devserver**: Creative superflat, encrypted store, authorize only once.
 - **Monorepo & multiloader ready**: `common {}` + `hytale {}` = automatic workspace linking.
 - **Kotlin & Java seamlessly**: Java pre-configured, and `useKotlin()`availabe to switch to Kotlin!
 - **Flat layout support**: Skip `main/java/package` path via `useFlat()` without affecting jars.
-- **Fast development loop**: `DCEVM` hot-reload (via IDE with agent) with auto IDEA configuration!
+- **IDEA configuration**: Automatic run configuration detection and creation for Hytale.
+- **Fast development loop**: `DCEVM` hot-reload in IDEA using debugger run configuration.
 - **Agent-based hot-reload**: Runtime mod lifecycle reloads for extending code hot swapping.
 - **True source linking**: DevServer & AssetEditor uses your sources; no copy, instant feedback.
 - **Testing included**: JUnit or Kotest with coverage reporting out of the box.
 
-_and 🚧 coming soon:_
+_and coming soon:_
 
-- _All toggles exposed: Every argument, every version, fully exposed for customization._
-- _SDK configuration: Provide the DCEVM-ready environment for even fewer steps to get started._
+- _VSCode & Neovim support: Auto-configure popular alternative development environments._
 - _Hytale sources: Decompilation for IntelliSense without affecting builds._
+- _SDK configuration: Provide the DCEVM-ready environment for even fewer steps to get started._
 
-<!-- 
-- *VSCode & Neovim support*: Auto-configure popular alternative development environments.
+<!--
 - *Publishing to CurseForge*: Remove one more obstacle to distribute your mod.
 - *CI/CI integration*: Generate your first pipeline for automation.
 -->
@@ -110,6 +111,19 @@ classes itself to you.
 Configures the parent directory for the `hytale` workspaces, by default, it is set to `hytale`,
 reset it with an empty string to simply create all your projects in the repository root.
 
+#### `patchline: Patchline.RELEASE`, `version: String`
+
+Configure which patchline from maven to depend on and within that which version. By default, it will
+use the RELEASE patchline with the "+" version, which means the latest.
+
+#### `devserver {}`
+
+- `Enabled: Boolean`: Controls if the devserver should be generated at all. (default=true)
+- `AllowOp: Boolean`: Enables privileged server sessions for OP permissions. (default=true)
+- `DisableSentry: Boolean`: Avoids spamming Hypixel with modding errors. (default=true)
+- `AcceptEarlyPlugins: Boolean`: Sets your plugin to be loaded with the builtins (default=false)
+- `IncludeUserMods: Boolean`: Links the launcher global mods into the devserver (default=false)
+
 #### `repositories {}`, `dependencies {}`,  `include(...projectString)`, `include(projectString)`
 
 Exposes the standard dependency management and project declaration where you can share the repos
@@ -179,9 +193,39 @@ Scaffoldit also ships Agent Plugin that at runtime detects the Hot Swapping and 
 automatically for you; with that you only need to click on "Code Changed" in the editor UI. If you
 only need this agent, you can use it by adding:
 
+## Under the hood toggles
+
+While the plugin sets up a complete development environment, you can fine-tune that by setting
+the included package versions, and their feature flags in the `gradle.properties`:
+
+```properties
+# gradle.properties
+org.gradle.daemon=true
+org.gradle.parallel=true
+org.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=512m
+# Use these after you stop touching your settings:
+org.gradle.configuration-cache=true
+org.gradle.caching=true
+# Under the hood settings:
+env.java.version=25
+env.scaffoldit.kotlinSupport=true
+env.scaffoldit.kotlinTest=true
+env.scaffoldit.kotlinTest.version=6.1.1
+env.scaffoldit.javaUnitTest=true
+env.scaffoldit.javaUnitTest.version=5.9.2
+env.scaffoldit.autoToolchain=true
+env.scaffoldit.monorepoSupport=true
+env.scaffoldit.globalAssets=true
+env.scaffoldit.agent=true
+env.hytale.devServerDCEVM=true
+env.hytale.devServerHotReload=true
+env.hytale.manifestGenerator=true
+env.hytale.configureIdea=true
+```
+
 ```kotlin
 dependencies {
-    runtimeOnly("dev.scaffoldit:devtools:0.2.2")
+    runtimeOnly("dev.scaffoldit:devtools:0.2.3")
 }
 ```
 

@@ -3,44 +3,96 @@
 package dev.scaffoldit.hytale
 
 import dev.scaffoldit.api.VERSION
+import dev.scaffoldit.api.Wired
 import dev.scaffoldit.gradle.Gradle
+import dev.scaffoldit.hytale.wire.HytaleGradle
+import dev.scaffoldit.hytale.wire.HytaleManifest
+import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.gradle.api.tasks.Copy
 
-class HytaleServerPlatform : Gradle.ConfigurePlatform {
-    fun configure(project: Project): Gradle.ConfigurePlatform {
-        val config = HytaleConfig(project)
+class HytaleServerPlatform() : HytaleGradle.ConfigurePlatform {
+    private val log: Logger = Logging.getLogger(this::class.java)
+    private val pfx: String = "> Plug "
 
-        project.repositories.maven {
-            it.url = project.uri("https://maven.hytale.com/${config.patchline}")
+    override var patchline: Patchline = Patchline.RELEASE
+
+    private var pendingManifest: (HytaleManifest.() -> Unit)? = null
+
+    override fun manifest(config: HytaleManifest.() -> Unit) {
+        pendingManifest = config
+    }
+
+    override fun manifest(action: Action<HytaleManifest>) {
+        pendingManifest = { action.execute(this) }
+    }
+
+    lateinit var project: Project
+
+    fun configure(
+        project: Project,
+        parent: HytaleGradle.ConfigurePlatform
+    ): Gradle.ConfigurePlatform {
+        this.project = project
+        this.patchline = parent.patchline
+
+        registerManifestGenerationTask()
+        configureHytaleMaven()
+        configureDevserverAgent()
+
+        project.afterEvaluate {
+            pendingManifest?.let { config ->
+                HytaleManifest.from(project).apply(config).configure(project)
+            }
+            HytaleManifest.from(project).saveTo(project)
         }
 
+        return this
+    }
+
+    fun registerManifestGenerationTask() {
+        with(project.tasks) {
+            val generateManifest = maybeCreate("generateManifest").apply {
+                description = "Generate the plugin manifest from settings and existing values."
+                group = "hytale"
+                doFirst {
+                    HytaleManifest.from(project).saveTo(project)
+                }
+            }
+            named("processResources", Copy::class.java) { task ->
+                task.dependsOn(generateManifest)
+                task.duplicatesStrategy = DuplicatesStrategy.INCLUDE
+            }
+        }
+    }
+
+    fun configureHytaleMaven() {
+        with(project.repositories) {
+            log.lifecycle("> Repos :${project.name}.maven('https://maven.hytale.com/${patchline.repo}')")
+            maven {
+                it.url = project.uri("https://maven.hytale.com/${patchline.repo}")
+            }
+        }
         with(project.dependencies) {
-            add("compileOnly", "com.hypixel.hytale:Server:+")
-            add("runtimeOnly", "com.hypixel.hytale:Server:+")
+            val version = project.providers.gradleProperty("env.hytale.version")
+                .getOrElse("+")
+
+            log.lifecycle("> Deps :${project.name}.implementation('com.hypixel.hytale:Server:$version')")
+            add("implementation", "com.hypixel.hytale:Server:$version")
+        }
+    }
+
+    fun configureDevserverAgent() {
+        with(project.dependencies) {
+            // TODO: Wrap this with a feature-flag
+            log.lifecycle("> Deps :${project.name}.runtimeOnly('dev.scaffoldit:devtools:${VERSION}')")
             add(
                 "runtimeOnly",
                 "dev.scaffoldit:devtools:${VERSION}"
             )
         }
-
-        with(project.tasks) {
-            val updateManifest =
-                findByName("updateHytaleManifest") ?: register("updateHytaleManifest") { task ->
-                    task.doFirst {
-                        HytaleManifest.from(project).saveTo(project)
-                    }
-                }
-
-            named("processResources", Copy::class.java) { task ->
-                task.dependsOn(updateManifest)
-                task.duplicatesStrategy = DuplicatesStrategy.INCLUDE
-            }
-        }
-
-        return this
     }
 }

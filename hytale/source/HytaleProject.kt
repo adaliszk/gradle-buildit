@@ -14,11 +14,13 @@ import org.gradle.api.Project
  */
 open class HytaleProject(private val project: Project) : HytaleExtension() {
     init {
+        if (NestedProjects.included.isEmpty()) {
+            projectDir = ""
+        }
         val rootDir = project.rootDir.resolve(projectDir)
         log.lifecycle("$pfx:hytale(project):initialize with ${rootDir.canonicalPath}")
         with(ToolchainManager::class).project = project
         project.afterEvaluate {
-            log.lifecycle("$pfx$projectDir(hy:project):afterEvaluate with ${NestedProjects.included}")
             configureProject(project)
         }
     }

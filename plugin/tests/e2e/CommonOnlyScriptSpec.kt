@@ -10,6 +10,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
 import org.gradle.testkit.runner.TaskOutcome
+import java.io.File
 
 
 class CommonOnlyScriptSpec : FunSpec({
@@ -22,7 +23,7 @@ class CommonOnlyScriptSpec : FunSpec({
             plugins {
                 id("dev.scaffoldit")
             }
-            #extensionName# {
+            common {
                 // Nothing configured
             } 
         """.trimIndent(),
@@ -47,7 +48,7 @@ class CommonOnlyScriptSpec : FunSpec({
             plugins {
                 id("dev.scaffoldit")
             }
-            #extensionName# {
+            common {
                 // Nothing configured
             } 
         """.trimIndent(),
@@ -75,7 +76,7 @@ class CommonOnlyScriptSpec : FunSpec({
             plugins {
                 id("dev.scaffoldit")
             }
-            #extensionName# {
+            common {
                 useKotlin()
             } 
         """.trimIndent(),
@@ -105,7 +106,7 @@ class CommonOnlyScriptSpec : FunSpec({
             plugins {
                 id("dev.scaffoldit")
             }
-            #extensionName# {
+            common {
                 useFlat()
             } 
         """.trimIndent(),
@@ -128,14 +129,36 @@ class CommonOnlyScriptSpec : FunSpec({
         rootDir.resolve("common/src/test/java").shouldNotExist()
     }
 
+    fun assertRootSkipped(rootDir: File) {
+        rootDir.resolve("assets").shouldExist()
+        rootDir.resolve("resources").shouldNotExist()
+        rootDir.resolve("source").shouldNotExist()
+        rootDir.resolve("src/main/resources").shouldNotExist()
+        rootDir.resolve("src/main/kotlin").shouldNotExist()
+        rootDir.resolve("src/test/resources").shouldNotExist()
+        rootDir.resolve("src/test/kotlin").shouldNotExist()
+        rootDir.resolve("src/main/java").shouldNotExist()
+        rootDir.resolve("src/test/java").shouldNotExist()
+    }
+
+    fun assertWorkspace(rootDir: File, name: String) {
+        rootDir.resolve("common/$name/src/main/resources").shouldExist()
+        rootDir.resolve("common/$name/src/main/java").shouldExist()
+        rootDir.resolve("common/$name/src/test/resources").shouldExist()
+        rootDir.resolve("common/$name/src/test/java").shouldExist()
+        rootDir.resolve("common/common").shouldNotExist()
+        rootDir.resolve("common/$name/common").shouldNotExist()
+        rootDir.resolve("common/$name/src/common").shouldNotExist()
+    }
+
     testEachWithGradle(
-        "no configuration with single include()",
+        "with single include() using single value",
         COMMON_SETTINGS,
         """
             plugins {
                 id("dev.scaffoldit")
             }
-            #extensionName# {
+            common {
                 include("#randomName#")
             } 
         """.trimIndent(),
@@ -143,23 +166,96 @@ class CommonOnlyScriptSpec : FunSpec({
         {
             it.resolve("common").mkdirs()
         }
-    ) { rootDir, case, result, randomArgs ->
+    ) { rootDir, _, result, randomArgs ->
         result.task(":projects")?.outcome shouldBe TaskOutcome.SUCCESS
         result.output shouldNotContain "No sub-projects"
 
-        rootDir.resolve("assets").shouldExist()
-        rootDir.resolve("src/main/resources").shouldNotExist()
-        rootDir.resolve("src/main/kotlin").shouldNotExist()
-        rootDir.resolve("src/test/resources").shouldNotExist()
-        rootDir.resolve("src/test/kotlin").shouldNotExist()
-        rootDir.resolve("src/main/java").shouldNotExist()
-        rootDir.resolve("src/test/java").shouldNotExist()
+        randomArgs.forEach { randomName ->
+            assertWorkspace(rootDir, randomName)
+        }
+
+        assertRootSkipped(rootDir)
+    }
+
+    testEachWithGradle(
+        "with single include() using multiple values",
+        COMMON_SETTINGS,
+        """
+            plugins {
+                id("dev.scaffoldit")
+            }
+            common {
+                include("#randomName#", "#randomName#", "#randomName#")
+            } 
+        """.trimIndent(),
+        listOf("projects", "--stacktrace"),
+        {
+            it.resolve("common").mkdirs()
+        }
+    ) { rootDir, _, result, randomArgs ->
+        result.task(":projects")?.outcome shouldBe TaskOutcome.SUCCESS
+        result.output shouldNotContain "No sub-projects"
 
         randomArgs.forEach { randomName ->
-            rootDir.resolve("${case.extensionName}/$randomName/src/main/resources").shouldExist()
-            rootDir.resolve("${case.extensionName}/$randomName/src/main/java").shouldExist()
-            rootDir.resolve("${case.extensionName}/$randomName/src/test/resources").shouldExist()
-            rootDir.resolve("${case.extensionName}/$randomName/src/test/java").shouldExist()
+            assertWorkspace(rootDir, randomName)
         }
+
+        assertRootSkipped(rootDir)
+    }
+
+    testEachWithGradle(
+        "with multiple include() using single values",
+        COMMON_SETTINGS,
+        """
+            plugins {
+                id("dev.scaffoldit")
+            }
+            common {
+                include("#randomName#")
+                include("#randomName#")
+                include("#randomName#")
+            } 
+        """.trimIndent(),
+        listOf("projects", "--stacktrace"),
+        {
+            it.resolve("common").mkdirs()
+        }
+    ) { rootDir, _, result, randomArgs ->
+        result.task(":projects")?.outcome shouldBe TaskOutcome.SUCCESS
+        result.output shouldNotContain "No sub-projects"
+
+        randomArgs.forEach { randomName ->
+            assertWorkspace(rootDir, randomName)
+        }
+
+        assertRootSkipped(rootDir)
+    }
+
+    testEachWithGradle(
+        "with multiple include() using multiple values",
+        COMMON_SETTINGS,
+        """
+            plugins {
+                id("dev.scaffoldit")
+            }
+            common {
+                include("#randomName#", "#randomName#", "#randomName#")
+                include("#randomName#", "#randomName#", "#randomName#")
+                include("#randomName#", "#randomName#", "#randomName#")
+            } 
+        """.trimIndent(),
+        listOf("projects", "--stacktrace"),
+        {
+            it.resolve("common").mkdirs()
+        }
+    ) { rootDir, _, result, randomArgs ->
+        result.task(":projects")?.outcome shouldBe TaskOutcome.SUCCESS
+        result.output shouldNotContain "No sub-projects"
+
+        randomArgs.forEach { randomName ->
+            assertWorkspace(rootDir, randomName)
+        }
+
+        assertRootSkipped(rootDir)
     }
 })

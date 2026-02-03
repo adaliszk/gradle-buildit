@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "2.3.0"
+    kotlin("jvm")
     kotlin("plugin.serialization") version "2.3.0"
     id("org.jetbrains.gradle.plugin.idea-ext") version "1.3"
 }

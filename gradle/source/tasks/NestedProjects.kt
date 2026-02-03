@@ -15,6 +15,8 @@ class NestedProjects : Gradle.ConfigurePackages {
 
     companion object {
         val included: MutableList<String> = mutableListOf()
+
+        fun withPrefix(projectDir: String) = included.filter { it.startsWith(":$projectDir") }
     }
 
     override var projectDir = ""
@@ -44,7 +46,7 @@ class NestedProjects : Gradle.ConfigurePackages {
 
     override fun include(project: String, userConfig: Project.() -> Unit) {
         val projectPath = ":$projectDir:$project".trimEnd(':').replace("::", ":")
-        log.lifecycle("NestedProjects.include($projectPath)")
+        log.debug("NestedProjects.include($projectPath)")
         if (projectPath.trim(':').isBlank()) return
         included.add(projectPath)
     }

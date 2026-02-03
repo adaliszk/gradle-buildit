@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "2.3.0"
+    kotlin("jvm")
     `java-library`
 }
 
@@ -42,7 +42,7 @@ val generateBuildConfig by tasks.registering {
             
             package dev.scaffoldit.api
             
-            val VERSION = "${project.version}"
+            val VERSION = "${project.rootProject.version}"
         """.trimIndent()
         )
     }
