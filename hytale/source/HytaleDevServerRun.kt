@@ -53,8 +53,12 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
         registerRunTask()
 
         val manifest = HytaleManifest.from(project)
-        val mainPackage = manifest.Main?.substringBeforeLast(".")
-            ?: "${project.group}.${project.name}".replace(":", ".").trim('.')
+
+        val packageCandidates = listOfNotNull(
+            manifest.Main?.substringBeforeLast("."),
+            "${project.group}.${project.name}".replace(":", ".").trim('.'),
+            "${project.rootProject.name}",
+        )
 
         project.afterEvaluate { scope ->
             if (scope.path !== project.path) return@afterEvaluate
@@ -64,7 +68,7 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
                 extensions.configure<IdeaModel>("idea") { idea ->
                     idea.project.settings.runConfigurations {
                         val config = withType(Application::class.java).firstOrNull {
-                            it.moduleName == "${mainPackage}.main"
+                            packageCandidates.contains("${it.moduleName}.main")
                         }
 
                         if (config == null) {
@@ -205,7 +209,7 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
             .getOrElse("true").toBoolean()
 
         val mainPackage: String = HytaleManifest.from(project).Main?.substringBeforeLast(".")
-            ?: "${project.group}.${project.name}"
+            ?: project.rootProject.name ?: "${project.group}.${project.name}"
 
         with(project) {
             plugins.apply(IdeaExtPlugin::class.java)
