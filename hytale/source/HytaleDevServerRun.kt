@@ -195,6 +195,15 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
     }
 
     private fun generateIdeaRunConfiguration() {
+        val configureIdea = project.providers
+            .gradleProperty("env.hytale.configureIdea")
+            .getOrElse("true").toBoolean()
+        if (!configureIdea) return
+
+        val devServerDCEVM = project.providers
+            .gradleProperty("env.hytale.devServerDCEVM")
+            .getOrElse("true").toBoolean()
+
         val mainPackage: String = HytaleManifest.from(project).Main?.substringBeforeLast(".")
             ?: "${project.group}.${project.name}"
 
@@ -211,7 +220,9 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
                         config.moduleName = "${mainPackage}.main".removePrefix(".")
                         config.programParameters = createServerRunArguments()
                         config.workingDirectory = project.projectDir.absolutePath
-                        config.jvmArgs = "-XX:+AllowEnhancedClassRedefinition"
+                        if (devServerDCEVM) {
+                            config.jvmArgs = "-XX:+AllowEnhancedClassRedefinition"
+                        }
                     }
                 }
             }

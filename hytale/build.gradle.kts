@@ -1,8 +1,7 @@
 plugins {
     kotlin("jvm")
     kotlin("plugin.serialization") version "2.3.0"
-    id("org.jetbrains.gradle.plugin.idea-ext") version "1.3" apply false
-    id("com.gradleup.shadow") version "9.3.1"
+    id("org.jetbrains.gradle.plugin.idea-ext") version "1.3"
 }
 
 extra["packageName"] = "ScaffoldIt Hytale Gradle"
@@ -41,12 +40,6 @@ configurations {
         outgoing.artifacts.clear()
         outgoing.artifact(tasks.jar)
     }
-}
-
-tasks.shadowJar {
-    // archiveClassifier.set("all")
-    // relocate("org.jetbrains.gradle.plugin.idea", "dev.scaffoldit.shaded.idea")
-    isZip64 = true
 }
 
 sourceSets {

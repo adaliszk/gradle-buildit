@@ -50,12 +50,18 @@ abstract class HytaleExtension :
 
         with(ToolchainManager::class).configure(project)
         with(SourceManager::class).configure(project, parent)
-        with(TestingEngine::class).configure(project)
 
-        // TODO: Figure out how not to cast here
+        // TODO: Figure out a way to not cast the parent here
+        with(TestingEngine::class).configure(
+            project, parent as Gradle.ConfigureToolchain
+        )
+
+        // TODO: Figure out a way to not cast the parent here
         with(HytaleServerPlatform::class).configure(
             project, parent as HytaleGradle.ConfigurePlatform
         )
+
+        // TODO: Figure out a way to not cast the parent here
         with(HytaleDevServerRun::class).configure(
             project, parent as Gradle.ConfigureToolchain
         )

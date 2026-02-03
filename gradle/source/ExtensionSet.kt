@@ -5,4 +5,5 @@ package dev.scaffoldit.gradle
 data class ExtensionSet<A : Extension, B : Extension>(
     val setting: Class<A>,
     val project: Class<B>,
+    val featureFlag: String? = null,
 )

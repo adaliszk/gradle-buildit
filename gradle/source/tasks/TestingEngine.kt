@@ -12,24 +12,25 @@ import org.gradle.testing.jacoco.tasks.JacocoReport
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
 
 class TestingEngine : Gradle.ConfigureTests {
-    fun configure(project: Project): TestingEngine {
-        val useKotlin = project.extraProperties.has("kotlin")
 
-        project.pluginManager.apply("org.gradle.jacoco")
 
-        // TODO: Expose the versions for users
+    lateinit var project: Project
+    var useKotlin: Boolean = false
+
+    fun configure(project: Project, parent: Gradle.ConfigureToolchain): TestingEngine {
+        val junitSupport = project.providers.gradleProperty("env.scaffoldit.javaUnitTest")
+            .getOrElse("true").toBoolean()
+        val kotestSupport = project.providers.gradleProperty("env.scaffoldit.kotlinTest")
+            .getOrElse("true").toBoolean()
+        if (!junitSupport && !kotestSupport) return this
+
+        this.useKotlin = parent.kotlin != null
+        this.project = project
+
         project.dependencies.apply {
             add("testRuntimeOnly", "org.junit.platform:junit-platform-launcher")
-            // TODO: Expose the versions as a configuration
-            if (useKotlin) {
-                add("testImplementation", "io.kotest:kotest-runner-junit5:5.8.0")
-                add("testImplementation", "io.kotest:kotest-assertions-core:5.8.0")
-                add("testImplementation", "io.kotest:kotest-property:5.8.0")
-            } else {
-                add("testImplementation", "org.junit.jupiter:junit-jupiter:5.10.1")
-                add("testImplementation", "org.assertj:assertj-core:3.24.2")
-            }
         }
+
         project.tasks.named("test", Test::class.java) { test ->
             test.useJUnitPlatform()
             test.filter { f ->
@@ -37,8 +38,47 @@ class TestingEngine : Gradle.ConfigureTests {
                 f.includeTestsMatching("*Spec")
                 f.isFailOnNoMatchingTests = false
             }
-            test.finalizedBy("jacocoTestReport")
         }
+
+        configureJacocoCoverage()
+
+        @Suppress("KotlinConstantConditions") // They are not constant
+        when (true) {
+            kotestSupport -> configureKotlinTest()
+            junitSupport -> configureJavaUnitTest()
+            else -> return this
+        }
+
+        return this
+    }
+
+    private fun configureJavaUnitTest() {
+        val version = project.providers.gradleProperty("env.scaffoldit.javaUnitTest.version")
+            .getOrElse("5.10.1") // TODO: Expose this to the build process via .properties
+
+        project.dependencies.apply {
+            add("testImplementation", "org.junit.jupiter:junit-jupiter:$version")
+        }
+    }
+
+    private fun configureKotlinTest() {
+        val version = project.providers.gradleProperty("env.scaffoldit.kotlinTest.version")
+            .getOrElse("6.1.1") // TODO: Expose this to the build process via .properties
+
+        project.dependencies.apply {
+            add("testImplementation", "io.kotest:kotest-runner-junit5:$version")
+            add("testImplementation", "io.kotest:kotest-assertions-core:$version")
+            add("testImplementation", "io.kotest:kotest-property:$version")
+        }
+    }
+
+    private fun configureJacocoCoverage() {
+        val supportEnabled = project.providers.gradleProperty("env.scaffoldit.jacocoCoverage")
+            .getOrElse("true").toBoolean()
+        if (!supportEnabled) return
+
+        project.pluginManager.apply("org.gradle.jacoco")
+
         project.tasks.named("jacocoTestReport", JacocoReport::class.java) { report ->
             report.dependsOn("test")
             report.reports {
@@ -46,6 +86,8 @@ class TestingEngine : Gradle.ConfigureTests {
             }
         }
 
-        return this
+        project.tasks.named("test", Test::class.java) { test ->
+            test.finalizedBy("jacocoTestReport")
+        }
     }
 }

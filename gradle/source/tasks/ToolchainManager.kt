@@ -51,8 +51,12 @@ class ToolchainManager : Gradle.ConfigureToolchain {
     }
 
     fun configure(project: Project): ToolchainManager {
+        val autoToolchain = project.providers
+            .gradleProperty("env.scaffoldit.autoToolchain")
+            .getOrElse("true").toBoolean()
+        if (!autoToolchain) return this
+
         log.debug("ToolchainManager.configure(kotlin=$kotlin)")
-        project.extra.set("kotlin", kotlin)
         this.project = project
 
         configurePlugins()
@@ -62,7 +66,6 @@ class ToolchainManager : Gradle.ConfigureToolchain {
         includeWorkspacePackages()
         pendingRepositoryChanges?.let { project.repositories.apply(it) }
         pendingDependencyChanges?.let { project.dependencies.apply(it) }
-        includeTestingKit()
 
         return this
     }
@@ -75,7 +78,7 @@ class ToolchainManager : Gradle.ConfigureToolchain {
             mavenCentral()
             maven { repo ->
                 repo.url = project.uri("https://cursemaven.com")
-                repo.name = "curse.maven"
+                repo.name = "curse"
             }
         }
     }
@@ -99,8 +102,18 @@ class ToolchainManager : Gradle.ConfigureToolchain {
                             .toInt()
                     )
                 )
-                ext.withSourcesJar()
-                ext.withJavadocJar()
+
+                if(project.providers
+                    .gradleProperty("env.java.compileSources")
+                    .getOrElse("true").toBoolean()) {
+                    ext.withSourcesJar()
+                }
+
+                if(project.providers
+                        .gradleProperty("env.java.compileDocs")
+                        .getOrElse("false").toBoolean()) {
+                    ext.withJavadocJar()
+                }
             }
         }
 
@@ -115,7 +128,10 @@ class ToolchainManager : Gradle.ConfigureToolchain {
     }
 
     private fun configureKotlin() {
-        if (kotlin === null) return
+        val kotlinSupport = project.providers
+            .gradleProperty("env.scaffoldit.kotlinSupport")
+            .getOrElse("true").toBoolean()
+        if (!kotlinSupport || kotlin === null) return
 
         with(project.pluginManager) {
             apply("org.jetbrains.kotlin.jvm")
@@ -145,14 +161,15 @@ class ToolchainManager : Gradle.ConfigureToolchain {
     }
 
     private fun includeWorkspacePackages() {
+        val monorepoAutoDepends = project.providers
+            .gradleProperty("env.scaffoldit.monorepoAutoDepends")
+            .getOrElse("true").toBoolean()
+        if (!monorepoAutoDepends) return
+
         with(project.dependencies) {
             NestedProjects.included.forEach {
                 add("implementation", project.project(it))
             }
         }
-    }
-
-    private fun includeTestingKit() {
-
     }
 }

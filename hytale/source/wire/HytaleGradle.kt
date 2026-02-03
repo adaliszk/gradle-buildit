@@ -13,6 +13,11 @@ object HytaleGradle {
             patchline = Patchline.valueOf(value.uppercase().replace("-", "_"))
         }
 
+        var version: String
+        fun useVersion(version: String) {
+            this.version = version
+        }
+
         fun manifest(config: HytaleManifest.() -> Unit)
         fun manifest(action: Action<HytaleManifest>)
     }

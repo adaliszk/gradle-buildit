@@ -20,6 +20,8 @@ class HytaleServerPlatform() : HytaleGradle.ConfigurePlatform {
 
     override var patchline: Patchline = Patchline.RELEASE
 
+    override var version: String = "+"
+
     private var pendingManifest: (HytaleManifest.() -> Unit)? = null
 
     override fun manifest(config: HytaleManifest.() -> Unit) {
@@ -44,6 +46,11 @@ class HytaleServerPlatform() : HytaleGradle.ConfigurePlatform {
         configureDevserverAgent()
 
         project.afterEvaluate {
+            val manifestGenerator = project.providers
+                .gradleProperty("env.hytale.manifestGenerator")
+                .getOrElse("true").toBoolean()
+            if (!manifestGenerator) return@afterEvaluate
+
             pendingManifest?.let { config ->
                 HytaleManifest.from(project).apply(config).configure(project)
             }
@@ -54,6 +61,11 @@ class HytaleServerPlatform() : HytaleGradle.ConfigurePlatform {
     }
 
     fun registerManifestGenerationTask() {
+        val manifestGenerator = project.providers
+            .gradleProperty("env.hytale.manifestGenerator")
+            .getOrElse("true").toBoolean()
+        if (!manifestGenerator) return
+
         with(project.tasks) {
             val generateManifest = maybeCreate("generateManifest").apply {
                 description = "Generate the plugin manifest from settings and existing values."
@@ -77,17 +89,18 @@ class HytaleServerPlatform() : HytaleGradle.ConfigurePlatform {
             }
         }
         with(project.dependencies) {
-            val version = project.providers.gradleProperty("env.hytale.version")
-                .getOrElse("+")
-
             log.lifecycle("> Deps :${project.name}.implementation('com.hypixel.hytale:Server:$version')")
             add("implementation", "com.hypixel.hytale:Server:$version")
         }
     }
 
     fun configureDevserverAgent() {
+        val devServerHotReload = project.providers
+            .gradleProperty("env.hytale.devServerHotReload")
+            .getOrElse("true").toBoolean()
+        if (!devServerHotReload) return
+
         with(project.dependencies) {
-            // TODO: Wrap this with a feature-flag
             log.lifecycle("> Deps :${project.name}.runtimeOnly('dev.scaffoldit:devtools:${VERSION}')")
             add(
                 "runtimeOnly",

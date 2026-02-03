@@ -39,6 +39,10 @@ abstract class CommonExtension :
 
         with(ToolchainManager::class).configure(project)
         with(SourceManager::class).configure(project, parent)
-        with(TestingEngine::class).configure(project)
+
+        // TODO: Figure out a way to not cast the parent here
+        with(TestingEngine::class).configure(
+            project, parent as Gradle.ConfigureToolchain
+        )
     }
 }
