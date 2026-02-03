@@ -21,11 +21,12 @@ flexible framework for mod development for Hytale, _and later for Minecraft._
 
 _and coming soon:_
 
-- _VSCode & Neovim support: Auto-configure popular alternative development environments._
-- _Hytale sources: Decompilation for IntelliSense without affecting builds._
-- _SDK configuration: Provide the DCEVM-ready environment for even fewer steps to get started._
+- _Hytale sources: Decompilation for IntelliSense without affecting builds. → (~50%)_
+- _Hytale assets: Automatic download of the Assets.zip for your devserver. → (~25%)_
+- _VSCode & Neovim support: Auto-configure popular alternative development environments → (~10%)._
 
 <!--
+- _SDK configuration: Provide the DCEVM-ready environment for even fewer steps to get started. → (~10%)_
 - *Publishing to CurseForge*: Remove one more obstacle to distribute your mod.
 - *CI/CI integration*: Generate your first pipeline for automation.
 -->
@@ -234,6 +235,8 @@ env.hytale.devServerDCEVM=true
 env.hytale.devServerHotReload=true
 env.hytale.manifestGenerator=true
 env.hytale.configureIdea=true
+# Example: D:\\HYTALE\\Data
+hytale.home_path=""
 ```
 
 # Contributions
