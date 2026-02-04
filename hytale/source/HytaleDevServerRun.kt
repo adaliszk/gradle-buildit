@@ -14,6 +14,7 @@ import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.tasks.SourceSetContainer
+import org.gradle.api.tasks.JavaExec
 import org.gradle.plugins.ide.idea.model.IdeaModel
 import org.jetbrains.gradle.ext.Application
 import org.jetbrains.gradle.ext.IdeaExtPlugin
@@ -177,23 +178,33 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
     }
 
     fun registerRunTask() {
-        project.tasks.maybeCreate("runServer").apply {
-            description =
+        project.tasks.register("runServer", JavaExec::class.java) {
+            it.description =
                 "Runs the devserver, use -Ddebug for opening a debugger and allow hot-swapping"
-            group = "hytale"
-            doLast {
+            it.group = "hytale"
+
+            it.doFirst {
                 if (!project.file(devserverDir).exists()) {
                     throw GradleException(
                         "Devserver has not be initialized in $devserverDir yet, " +
                             "please run ./gradlew setupServer to initialize it!"
                     )
                 }
+            }
 
-                ProcessBuilder(
-                    listOf("java", "-jar", "your.jar") + createServerRunArguments()
-                ).inheritIO().start().also { process ->
-                    process.waitFor()
-                }
+            it.mainClass.set("com.hypixel.hytale.Main")
+            it.classpath = project.extensions.getByType(SourceSetContainer::class.java)
+                .getByName("main").runtimeClasspath
+            it.workingDir = project.file(devserverDir)
+            it.args = createServerRunArgumentsList()
+            it.standardInput = System.`in`
+
+            val devServerDCEVM = project.providers
+                .gradleProperty("env.hytale.devServerDCEVM")
+                .getOrElse("true").toBoolean()
+
+            if (devServerDCEVM) {
+                it.jvmArgs = listOf("-XX:+AllowEnhancedClassRedefinition")
             }
         }
     }
@@ -234,6 +245,10 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
     }
 
     private fun createServerRunArguments(): String {
+        return createServerRunArgumentsList().joinToString(" ")
+    }
+
+    private fun createServerRunArgumentsList(): List<String> {
         val assetsFile = resolveAssets()
         val params = devserver?.toArgs()?.toMutableList()
             ?: mutableListOf()
@@ -248,7 +263,7 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
         }
         params.add("--mods=\"${modPaths.joinToString(",")}\"")
 
-        return params.joinToString(" ")
+        return params
     }
 
     // endregion
