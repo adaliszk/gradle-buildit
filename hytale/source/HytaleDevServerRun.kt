@@ -183,13 +183,20 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
                 "Runs the devserver, use -Ddebug for opening a debugger and allow hot-swapping"
             it.group = "hytale"
 
-            it.doFirst {
+            it.doFirst { t ->
                 if (!project.file(devserverDir).exists()) {
                     throw GradleException(
                         "Devserver has not be initialized in $devserverDir yet, " +
                             "please run ./gradlew setupServer to initialize it!"
                     )
                 }
+                val jExec = t as JavaExec
+                val exec = jExec.executable ?: "java"
+                val jvm = jExec.allJvmArgs.joinToString(" ")
+                val cp = jExec.classpath.asPath
+                val main = jExec.mainClass.get()
+                val args = jExec.args?.joinToString(" ") ?: ""
+                log.lifecycle("Running Exec: $exec $jvm -cp \"$cp\" $main $args")
             }
 
             it.mainClass.set("com.hypixel.hytale.Main")
@@ -197,15 +204,23 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
                 .getByName("main").runtimeClasspath
             it.workingDir = project.file(devserverDir)
             it.args = createServerRunArgumentsList()
+            
             it.standardInput = System.`in`
 
+            val jvmArguments = mutableListOf<String>()
             val devServerDCEVM = project.providers
                 .gradleProperty("env.hytale.devServerDCEVM")
-                .getOrElse("true").toBoolean()
+                .getOrElse("false").toBoolean()
 
             if (devServerDCEVM) {
-                it.jvmArgs = listOf("-XX:+AllowEnhancedClassRedefinition")
+                jvmArguments.add("-XX:+AllowEnhancedClassRedefinition")
             }
+
+            if (System.getProperty("debug") != null) {
+                jvmArguments.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005")
+            }
+
+            it.jvmArgs = jvmArguments
         }
     }
 
@@ -217,7 +232,7 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
 
         val devServerDCEVM = project.providers
             .gradleProperty("env.hytale.devServerDCEVM")
-            .getOrElse("true").toBoolean()
+            .getOrElse("false").toBoolean()
 
         val mainPackage: String = HytaleManifest.from(project).Main?.substringBeforeLast(".")
             ?: project.rootProject.name ?: "${project.group}.${project.name}"
@@ -252,8 +267,7 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
         val assetsFile = resolveAssets()
         val params = devserver?.toArgs()?.toMutableList()
             ?: mutableListOf()
-
-        params.add("--assets=\"$assetsFile\"")
+        params.add("--assets=$assetsFile")
         val modPaths = mutableListOf<String>().also {
             it.add(sourcePath.absolutePath)
             if (devserver?.IncludeUserMods == true) {
@@ -261,8 +275,7 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
                 it.add("${homePath}/UserData/Mods")
             }
         }
-        params.add("--mods=\"${modPaths.joinToString(",")}\"")
-
+        params.add("--mods=${modPaths.joinToString(",")}")
         return params
     }
 
