@@ -13,17 +13,17 @@ import org.gradle.api.Project
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.ExtensionAware
-import org.gradle.api.tasks.SourceSetContainer
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.JavaExec
+import org.gradle.api.tasks.SourceSetContainer
+import org.gradle.jvm.toolchain.JavaLanguageVersion
+import org.gradle.jvm.toolchain.JavaLauncher
+import org.gradle.jvm.toolchain.JavaToolchainService
+import org.gradle.jvm.toolchain.JvmVendorSpec
 import org.gradle.plugins.ide.idea.model.IdeaModel
-import org.jetbrains.gradle.ext.Application
-import org.jetbrains.gradle.ext.IdeaExtPlugin
-import org.jetbrains.gradle.ext.ProjectSettings
-import org.jetbrains.gradle.ext.runConfigurations
-import org.jetbrains.gradle.ext.settings
+import org.jetbrains.gradle.ext.*
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import java.io.File
-import kotlin.apply
 
 class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
     private val log: Logger = Logging.getLogger(this::class.java)
@@ -178,41 +178,24 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
     }
 
     fun registerRunTask() {
-        project.tasks.register("runServer", JavaExec::class.java) {
-            it.description =
-                "Runs the devserver, use -Ddebug for opening a debugger and allow hot-swapping"
-            it.group = "hytale"
+        val devServerDCEVM = project.providers
+            .gradleProperty("env.hytale.devServerDCEVM")
+            .getOrElse("true").toBoolean()
 
-            it.doFirst { t ->
-                if (!project.file(devserverDir).exists()) {
-                    throw GradleException(
-                        "Devserver has not be initialized in $devserverDir yet, " +
-                            "please run ./gradlew setupServer to initialize it!"
-                    )
-                }
-                val jExec = t as JavaExec
-                val exec = jExec.executable ?: "java"
-                val jvm = jExec.allJvmArgs.joinToString(" ")
-                val cp = jExec.classpath.asPath
-                val main = jExec.mainClass.get()
-                val args = jExec.args?.joinToString(" ") ?: ""
-                log.lifecycle("Running Exec: $exec $jvm -cp \"$cp\" $main $args")
-            }
+        val devserverPath = project.file(devserverDir)
+        val runtimeClassPath = project.configurations.getByName("runtimeClasspath")
+        val jvmArguments = mutableListOf<String>()
+        val javaProvider = resolveJava()
 
-            it.mainClass.set("com.hypixel.hytale.Main")
-            it.classpath = project.extensions.getByType(SourceSetContainer::class.java)
-                .getByName("main").runtimeClasspath
-            it.workingDir = project.file(devserverDir)
-            it.args = createServerRunArgumentsList()
-            
-            it.standardInput = System.`in`
+        val runServer = project.tasks.maybeCreate("runServer", JavaExec::class.java).apply {
+            description = "Runs the devserver, use -Ddebug for opening a debugger and allow hot-swapping"
+            group = "hytale"
+            standardInput = System.`in`
+            classpath(runtimeClassPath)
+            workingDir(devserverPath)
+            mainClass.set("com.hypixel.hytale.Main")
 
-            val jvmArguments = mutableListOf<String>()
-            val devServerDCEVM = project.providers
-                .gradleProperty("env.hytale.devServerDCEVM")
-                .getOrElse("false").toBoolean()
-
-            if (devServerDCEVM) {
+            if (javaProvider.hasDCEVM && devServerDCEVM) {
                 jvmArguments.add("-XX:+AllowEnhancedClassRedefinition")
             }
 
@@ -220,7 +203,23 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
                 jvmArguments.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005")
             }
 
-            it.jvmArgs = jvmArguments
+            javaLauncher.set(javaProvider.jdk)
+            args(createServerRunArgumentsList())
+
+            doFirst {
+                if (!project.file(devserverDir).exists()) {
+                    throw GradleException(
+                        "Devserver has not been initialized in $devserverDir yet, " +
+                            "please run ./gradlew setupServer to initialize it!"
+                    )
+                }
+            }
+        }
+
+        project.tasks.maybeCreate("devServer").apply {
+            description = "Alias for runServer (as mistakes were made with referencing things)"
+            group = "hytale"
+            dependsOn(runServer)
         }
     }
 
@@ -232,10 +231,12 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
 
         val devServerDCEVM = project.providers
             .gradleProperty("env.hytale.devServerDCEVM")
-            .getOrElse("false").toBoolean()
+            .getOrElse("true").toBoolean()
 
         val mainPackage: String = HytaleManifest.from(project).Main?.substringBeforeLast(".")
-            ?: project.rootProject.name ?: "${project.group}.${project.name}"
+            ?: project.rootProject.name
+
+        val javaProvider = resolveJava()
 
         with(project) {
             plugins.apply(IdeaExtPlugin::class.java)
@@ -250,7 +251,7 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
                         config.moduleName = "${mainPackage}.main".removePrefix(".")
                         config.programParameters = createServerRunArguments()
                         config.workingDirectory = project.file(devserverDir).absolutePath
-                        if (devServerDCEVM) {
+                        if (javaProvider.hasDCEVM && devServerDCEVM) {
                             config.jvmArgs = "-XX:+AllowEnhancedClassRedefinition"
                         }
                     }
@@ -271,12 +272,37 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
         val modPaths = mutableListOf<String>().also {
             it.add(sourcePath.absolutePath)
             if (devserver?.IncludeUserMods == true) {
-                // TODO: Check that the launcher instance is even installed
+                // TODO: Check that the launcher instance is even installed, and if there are duplicates
                 it.add("${homePath}/UserData/Mods")
             }
         }
         params.add("--mods=${modPaths.joinToString(",")}")
         return params
+    }
+
+    private data class JavaProvider(val jdk: Provider<JavaLauncher>, val hasDCEVM: Boolean)
+
+
+    private fun resolveJava(): JavaProvider {
+        val toolchains = project.extensions.getByType(JavaToolchainService::class.java)
+
+        val jetbrainsJDK = toolchains.launcherFor {
+            it.languageVersion.set(JavaLanguageVersion.of(25))
+            it.vendor.set(JvmVendorSpec.JETBRAINS)
+        }
+
+        val fallbackJDK = toolchains.launcherFor {
+            it.languageVersion.set(JavaLanguageVersion.of(25))
+        }
+
+        return try {
+            jetbrainsJDK.get() // forces resolution so it can throw errors like it does not exist
+            JavaProvider(jetbrainsJDK, true)
+        } catch (_: Exception) {
+            log.warn("JetBrains JDK not found, falling back to default JDK 25. DCEVM hot-swap won't be available.")
+            // TODO: Communicate this to the dependencies too so that the Devtools Agent also not added
+            JavaProvider(fallbackJDK, false)
+        }
     }
 
     // endregion
