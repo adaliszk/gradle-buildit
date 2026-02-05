@@ -1,7 +1,11 @@
 rootProject.name = "dev.scaffoldit.examples.java"
 
+pluginManagement {
+    includeBuild("../..")
+}
+
 plugins {
-    id("dev.scaffoldit") version "0.2.3"
+    id("dev.scaffoldit") // version "0.2.3"
 }
 
 hytale {
