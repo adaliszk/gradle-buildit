@@ -14,6 +14,7 @@ import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.tasks.SourceSetContainer
+import org.gradle.api.tasks.JavaExec
 import org.gradle.plugins.ide.idea.model.IdeaModel
 import org.jetbrains.gradle.ext.Application
 import org.jetbrains.gradle.ext.IdeaExtPlugin
@@ -177,24 +178,49 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
     }
 
     fun registerRunTask() {
-        project.tasks.maybeCreate("runServer").apply {
-            description =
+        project.tasks.register("runServer", JavaExec::class.java) {
+            it.description =
                 "Runs the devserver, use -Ddebug for opening a debugger and allow hot-swapping"
-            group = "hytale"
-            doLast {
+            it.group = "hytale"
+
+            it.doFirst { t ->
                 if (!project.file(devserverDir).exists()) {
                     throw GradleException(
                         "Devserver has not be initialized in $devserverDir yet, " +
                             "please run ./gradlew setupServer to initialize it!"
                     )
                 }
-
-                ProcessBuilder(
-                    listOf("java", "-jar", "your.jar") + createServerRunArguments()
-                ).inheritIO().start().also { process ->
-                    process.waitFor()
-                }
+                val jExec = t as JavaExec
+                val exec = jExec.executable ?: "java"
+                val jvm = jExec.allJvmArgs.joinToString(" ")
+                val cp = jExec.classpath.asPath
+                val main = jExec.mainClass.get()
+                val args = jExec.args?.joinToString(" ") ?: ""
+                log.lifecycle("Running Exec: $exec $jvm -cp \"$cp\" $main $args")
             }
+
+            it.mainClass.set("com.hypixel.hytale.Main")
+            it.classpath = project.extensions.getByType(SourceSetContainer::class.java)
+                .getByName("main").runtimeClasspath
+            it.workingDir = project.file(devserverDir)
+            it.args = createServerRunArgumentsList()
+            
+            it.standardInput = System.`in`
+
+            val jvmArguments = mutableListOf<String>()
+            val devServerDCEVM = project.providers
+                .gradleProperty("env.hytale.devServerDCEVM")
+                .getOrElse("false").toBoolean()
+
+            if (devServerDCEVM) {
+                jvmArguments.add("-XX:+AllowEnhancedClassRedefinition")
+            }
+
+            if (System.getProperty("debug") != null) {
+                jvmArguments.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005")
+            }
+
+            it.jvmArgs = jvmArguments
         }
     }
 
@@ -206,7 +232,7 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
 
         val devServerDCEVM = project.providers
             .gradleProperty("env.hytale.devServerDCEVM")
-            .getOrElse("true").toBoolean()
+            .getOrElse("false").toBoolean()
 
         val mainPackage: String = HytaleManifest.from(project).Main?.substringBeforeLast(".")
             ?: project.rootProject.name ?: "${project.group}.${project.name}"
@@ -234,11 +260,14 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
     }
 
     private fun createServerRunArguments(): String {
+        return createServerRunArgumentsList().joinToString(" ")
+    }
+
+    private fun createServerRunArgumentsList(): List<String> {
         val assetsFile = resolveAssets()
         val params = devserver?.toArgs()?.toMutableList()
             ?: mutableListOf()
-
-        params.add("--assets=\"$assetsFile\"")
+        params.add("--assets=$assetsFile")
         val modPaths = mutableListOf<String>().also {
             it.add(sourcePath.absolutePath)
             if (devserver?.IncludeUserMods == true) {
@@ -246,9 +275,8 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
                 it.add("${homePath}/UserData/Mods")
             }
         }
-        params.add("--mods=\"${modPaths.joinToString(",")}\"")
-
-        return params.joinToString(" ")
+        params.add("--mods=${modPaths.joinToString(",")}")
+        return params
     }
 
     // endregion
