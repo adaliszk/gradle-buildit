@@ -6,6 +6,7 @@ package dev.scaffoldit.hytale.wire
 data class DevServerConfig(
     var Enabled: Boolean = true,
     var AllowOp: Boolean = true,
+    var OfflineMode: Boolean = true,
     var DisableSentry: Boolean = true,
     var AcceptEarlyPlugins: Boolean = false,
     var IncludeUserMods: Boolean = false,
@@ -14,6 +15,7 @@ data class DevServerConfig(
         ::AllowOp to "--allow-op",
         ::DisableSentry to "--disable-sentry",
         ::AcceptEarlyPlugins to "--accept-early-plugins",
+        ::OfflineMode to "--auth-mode=offline",
     ).filter { it.key.get() }
         .values.toList()
 }
