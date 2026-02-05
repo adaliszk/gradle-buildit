@@ -3,7 +3,6 @@
 package dev.scaffoldit.hytale
 
 import dev.scaffoldit.api.VERSION
-import dev.scaffoldit.api.Wired
 import dev.scaffoldit.gradle.Gradle
 import dev.scaffoldit.hytale.wire.HytaleGradle
 import dev.scaffoldit.hytale.wire.HytaleManifest
@@ -16,7 +15,6 @@ import org.gradle.api.tasks.Copy
 
 class HytaleServerPlatform() : HytaleGradle.ConfigurePlatform {
     private val log: Logger = Logging.getLogger(this::class.java)
-    private val pfx: String = "> Plug "
 
     override var patchline: Patchline = Patchline.RELEASE
 
@@ -66,12 +64,13 @@ class HytaleServerPlatform() : HytaleGradle.ConfigurePlatform {
             .getOrElse("true").toBoolean()
         if (!manifestGenerator) return
 
+        val scope = project
         with(project.tasks) {
             val generateManifest = maybeCreate("generateManifest").apply {
                 description = "Generate the plugin manifest from settings and existing values."
                 group = "hytale"
                 doFirst {
-                    HytaleManifest.from(project).saveTo(project)
+                    HytaleManifest.from(scope).saveTo(scope)
                 }
             }
             named("processResources", Copy::class.java) { task ->
