@@ -1,3 +1,9 @@
+## 0.2.8
+
+- Fixed `usePatchline` and `useVersion` not applying the desired configuration
+- Shelved offline-mode devserver as DevelopmentMode for the future when its available
+- Fixed missed quotation around Asset and Mods paths
+
 ## 0.2.7
 
 - Fixed missing `compileOnly` access in `dependencies` ([#2](https://github.com/adaliszk/gradle-scaffoldit-modkit/issues/2))
