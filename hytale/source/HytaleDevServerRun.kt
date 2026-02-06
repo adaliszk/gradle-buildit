@@ -136,20 +136,10 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
     }
 
     private fun bootstrapAssets() {
-        val assetsFile = resolveAssets()
-        if (assetsFile !== null) return // Already exist no need to download
-
-        // TODO: Implement downloading via the installer when no instance available
-
-        throw GradleException(
-            "Assets are not present, without that it is not possible to run a server! " +
-                "Please download the ${HytaleExtension.patchline} via the Hytale Launcher " +
-                "which should download into `$homePath`, but you can overwrite that with " +
-                "the `hytale.home_path` gradle.properties entry!"
-        )
+        resolveAssets()
     }
 
-    private fun resolveAssets(): File? {
+    private fun resolveAssets(): File {
         val patchline = HytaleExtension.patchline
         val version = HytaleExtension.version.replace("+", "latest")
 
@@ -162,7 +152,12 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
         return when (true) {
             downloadPath.exists() -> downloadPath
             installPath.exists() -> installPath
-            else -> null
+            else -> throw GradleException(
+                "Assets are not present, without that it is not possible to run a server! " +
+                    "Please download the ${HytaleExtension.patchline} via the Hytale Launcher " +
+                    "which should download into `$homePath`, but you can overwrite that with " +
+                    "the `hytale.home_path` gradle.properties entry!"
+            )
         }
     }
 
@@ -199,7 +194,8 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
         val buildTask = project.tasks.named("classes")
 
         val runServer = project.tasks.maybeCreate("runServer", JavaExec::class.java).apply {
-            description = "Runs the devserver, use -Ddebug for opening a debugger and allow hot-swapping"
+            description =
+                "Runs the devserver, use -Ddebug for opening a debugger and allow hot-swapping"
             group = "hytale"
             dependsOn(manifestTask, buildTask)
 
@@ -214,6 +210,7 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
 
             if (System.getProperty("debug") != null) {
                 jvmArguments.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005")
+                jvmArguments.add("-XX:+AllowEnhancedClassRedefinition")
             }
 
             javaLauncher.set(javaProvider.jdk)
@@ -283,20 +280,24 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
     private fun createServerRunArgumentsList(): List<String> {
         val assetsFile = resolveAssets()
         val params = devserver.toArgs().toMutableList()
-        params.add("--assets=\"$assetsFile\"")
+        params.add("--assets=${assetsFile.canonicalPath.quotedIfNeeded()}")
         val modPaths = mutableListOf<String>().also {
-            it.add(sourcePath.absolutePath)
+            it.add(sourcePath.canonicalPath)
             if (devserver.IncludeUserMods) {
                 // TODO: Check that the launcher instance is even installed, and if there are duplicates
-                it.add("${homePath}/UserData/Mods")
+                it.add(File("${homePath}/UserData/Mods").canonicalPath)
             }
         }
-        params.add("--mods=\"${modPaths.joinToString(",")}\"")
+        params.add("--mods=${modPaths.joinToString(",").quotedIfNeeded()}")
         return params
     }
 
-    private data class JavaProvider(val jdk: Provider<JavaLauncher>, val hasDCEVM: Boolean)
+    private fun String.quotedIfNeeded(): String =
+        if (contains(" ")) '"' + this + '"' else this
 
+    private data class JavaProvider(
+        val jdk: Provider<JavaLauncher>, val hasDCEVM: Boolean
+    )
 
     private fun resolveJava(): JavaProvider {
         val toolchains = project.extensions.getByType(JavaToolchainService::class.java)

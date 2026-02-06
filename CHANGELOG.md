@@ -1,3 +1,7 @@
+## 0.2.9
+
+- Changed quotation to only apply ONLY when spaces are found in paths
+
 ## 0.2.8
 
 - Fixed `usePatchline` and `useVersion` not applying the desired configuration
