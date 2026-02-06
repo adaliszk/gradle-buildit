@@ -30,7 +30,7 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
 
     override var devserverDir: String = "devserver"
 
-    internal var devserver: DevServerConfig? = null
+    internal var devserver: DevServerConfig = DevServerConfig()
 
     override fun devserver(config: DevServerConfig.() -> Unit) {
         devserver = DevServerConfig().apply(config)
@@ -121,7 +121,7 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
 
     private fun bootstrapDevserver() {
         project.afterEvaluate {
-            if (devserver?.Enabled == false) return@afterEvaluate // Feature-flag
+            if (!devserver.Enabled) return@afterEvaluate
 
             val serverRunDir = project.file(devserverDir)
             if (serverRunDir.mkdirs()) {
@@ -204,10 +204,13 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
             }
 
             javaLauncher.set(javaProvider.jdk)
-            args(createServerRunArgumentsList())
+
+            val serverArgs = createServerRunArgumentsList()
+            args(serverArgs)
 
             doFirst {
-                if (!project.file(devserverDir).exists()) {
+                log.lifecycle("> Hytale: :runServer:$serverArgs")
+                if (!devserverPath.exists()) {
                     throw GradleException(
                         "Devserver has not been initialized in $devserverDir yet, " +
                             "please run ./gradlew setupServer to initialize it!"
@@ -266,12 +269,11 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
 
     private fun createServerRunArgumentsList(): List<String> {
         val assetsFile = resolveAssets()
-        val params = devserver?.toArgs()?.toMutableList()
-            ?: mutableListOf()
+        val params = devserver.toArgs().toMutableList()
         params.add("--assets=$assetsFile")
         val modPaths = mutableListOf<String>().also {
             it.add(sourcePath.absolutePath)
-            if (devserver?.IncludeUserMods == true) {
+            if (devserver.IncludeUserMods) {
                 // TODO: Check that the launcher instance is even installed, and if there are duplicates
                 it.add("${homePath}/UserData/Mods")
             }
