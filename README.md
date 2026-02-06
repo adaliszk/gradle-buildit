@@ -47,7 +47,6 @@ and flexible toolkit for mod development for Hytale, _and later for Minecraft._
 </tr>
 </table>
 
-
 <!-- <td><b>Source retrieval or decompiler</b><br/> Provide full IntelliSense without re-bundling sources for builds.</td> -->
 <!-- <td><b>VSCode & Neovim support</b><br/> Auto-configure popular alternative development environments</td> -->
 <!-- <td><b>CI/CI integration</b><br/> Generate popular pipelines for automation or have the hooks for custom solutions.</td> -->
@@ -55,8 +54,12 @@ and flexible toolkit for mod development for Hytale, _and later for Minecraft._
 
 > [!NOTE]
 > Latest update:
-> - Fixed `runServer` usage thanks to @Sacramentix
-> - Added offline mode to skip authentication
+> - Fixed missing `compileOnly` access in `dependencies` ([#2](https://github.com/adaliszk/gradle-scaffoldit-modkit/issues/2))
+> - Fixed plugin not being available in the `runServer` task ([#8](https://github.com/adaliszk/gradle-scaffoldit-modkit/issues/8))
+> - Disabled offline-mode as it is only meant for singleplayer ([#9](https://github.com/adaliszk/gradle-scaffoldit-modkit/issues/9))
+> - Fixed missing arguments for `runServer` task ([#10](https://github.com/adaliszk/gradle-scaffoldit-modkit/issues/10))
+
+See the whole [CHANGELOG](CHANGELOG.md)
 
 ## Requirements
 
