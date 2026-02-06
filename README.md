@@ -1,35 +1,60 @@
-# ScaffoldIt! Gradle Plugin
+<div align="center">
 
-Keep the necessary boilerplate at the absolute minimum while also having access to a robust and
-flexible framework for mod development for Hytale, _and later for Minecraft._
+# Scaffoldit Gradle Plugin
 
-## Features
-
-- **Zero-boilerplate Gradle**: Configure everything from settings or build, kotlin or groovy.
-- **All toggles exposed**: Every argument, every version, fully exposed for customization.
-- **Batteries included**: MavenCentral, CurseMaven, HytaleMaven auto-wired, ready to use!
-- **First-class Hytale support**: Fully typed manifest, nested SubPlugins, in-place generation.
-- **Pre-configured devserver**: Creative superflat, encrypted store, authorize only once.
-- **Monorepo & multiloader ready**: `common {}` + `hytale {}` = automatic workspace linking.
-- **Kotlin & Java seamlessly**: Java pre-configured, and `useKotlin()`availabe to switch to Kotlin!
-- **Flat layout support**: Skip `main/java/package` path via `useFlat()` without affecting jars.
-- **IDEA configuration**: Automatic run configuration detection and creation for Hytale.
-- **Fast development loop**: `DCEVM` hot-reload in IDEA using debugger run configuration.
-- **Agent-based hot-reload**: Runtime mod lifecycle reloads for extending code hot swapping.
-- **True source linking**: DevServer & AssetEditor uses your sources; no copy, instant feedback.
-- **Testing included**: JUnit or Kotest with coverage reporting out of the box.
-
-_and coming soon:_
-
-- _Hytale sources: Decompilation for IntelliSense without affecting builds. → (~50%)_
-- _Hytale assets: Automatic download of the Assets.zip for your devserver. → (~25%)_
-- _VSCode & Neovim support: Auto-configure popular alternative development environments → (~10%)._
+[![Java](https://img.shields.io/badge/Java-25_0-orange?style=for-the-badge)](https://openjdk.org)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2_3-7F52FF?style=for-the-badge)](https://kotlinlang.org)
+[![Gradle](https://img.shields.io/badge/Gradle-9_2-1BA8CB?style=for-the-badge)](https://gradle.org)
+[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
 <!--
-- _SDK configuration: Provide the DCEVM-ready environment for even fewer steps to get started. → (~10%)_
-- *Publishing to CurseForge*: Remove one more obstacle to distribute your mod.
-- *CI/CI integration*: Generate your first pipeline for automation.
+[![Docs](https://img.shields.io/badge/Docs-blue?style=for-the-badge)](https://scaffoldit.dev)
+[![Hytale](https://img.shields.io/badge/Hytale-blue?style=for-the-badge)](https://scaffoldit.dev)
+[![Fabric](https://img.shields.io/badge/Fabric-blue?style=for-the-badge)](https://scaffoldit.dev)
+[![NeoForge](https://img.shields.io/badge/NeoForge-blue?style=for-the-badge)](https://scaffoldit.dev)
 -->
+
+Keep the necessary boilerplate at the absolute minimum while also having access to a <br/>
+and flexible toolkit for mod development for Hytale, _and later for Minecraft._
+
+</div>
+
+<table>
+<tr>
+  <td><b>Zero-boilerplate Gradle</b><br/> Configure everything from settings or build, kotlin or groovy.</td>
+  <td><b>All toggles exposed</b><br/> Every argument, every version, is fully exposed for customization.</td>
+  <td><b>Batteries included</b><br/> MavenCentral, CurseMaven, HytaleMaven auto-wired, ready to use!</td>
+</tr>
+<tr>
+  <td><b>First-class Hytale support</b><br/> Fully typed manifest, nested SubPlugins, in-place generation.</td>
+  <td><b>Agent-based hot-reload</b><br/> Runtime mod lifecycle reloads using `DCEVM` for code hot swapping.</td>
+  <td><b>Monorepo & multiloader ready</b><br/> `common {}` + `hytale {}` = automatic workspace linking for multi-workspace use.</td>
+</tr>
+<tr>
+  <td><b>Kotlin & Java seamlessly</b><br/> Java pre-configured, and `useKotlin()` available to switch to Kotlin!</td>
+  <td><b>Flat layout support</b><br/> Skip `main/java/package` path via `useFlat()` without affecting jars.</td>
+  <td><b>Gradle tasks</b><br/> Expose all IDE-style integrations as tasks for CLI usage.</td>
+</tr>
+<tr>
+  <td><b>IDEA configuration</b><br/> Automatic run configuration detection and creation for Hytale.</td> 
+  <td><b>SDK Resolution</b><br/> Automatically configure and detect JVMs and turn on DCEVM when possible.</td>
+<td><b>True source linking</b><br/> DevServer & AssetEditor use your sources; no copy, instant feedback.</td>
+</tr>
+<tr>
+  <td><b>Testing included</b><br/> JUnit or Kotest with coverage reporting out of the box.</td>
+  <td><b>Pre-configured devserver</b><br/> Creative superflat with offline mode turned on for a quick start.</td>
+<td>&nbsp;</td>
+</tr>
+</table>
+
+
+<!-- <td><b>Source retrieval or decompiler</b><br/> Provide full IntelliSense without re-bundling sources for builds.</td> -->
+<!-- <td><b>VSCode & Neovim support</b><br/> Auto-configure popular alternative development environments</td> -->
+<!-- <td><b>CI/CI integration</b><br/> Generate popular pipelines for automation or have the hooks for custom solutions.</td> -->
+<!-- <td><b>Publishing to CurseForge</b><br/> Remove one more obstacle to distribute your mod by autmating the process.</td> -->
+
+> [!INFO]
+> Latest update: Fixed `runServer` usage thanks to @Sacramentix, and added offline mode to skip authentication
 
 ## Requirements
 
@@ -43,7 +68,7 @@ _and coming soon:_
 // settings.gradle.kts
 rootProject.name = "dev.example"
 plugins {
-    id("dev.scaffoldit") version "0.2.5"
+    id("dev.scaffoldit") version "0.2.+"
 }
 hytale {
     manifest {
@@ -57,11 +82,11 @@ hytale {
 
 This will expose several Gradle commands under the "hytale" group:
 
-| Command                    | Description                                                                                               |
-|:---------------------------|:----------------------------------------------------------------------------------------------------------|
-| `gradlew setupServer`      | (Re-)Create the the devserver within the project, watch out, re-running this deletes the existing server! |
-| `gradlew runServer`        | Runs the devserver, use -Ddebug for opening a debugger and allow hot-swapping                             |
-| `gradlew generateManifest` | Generate the plugin manifest from settings and existing values. This is automatically done during build.  |
+| Command                         | Description                                                                    |
+|:--------------------------------|:-------------------------------------------------------------------------------|
+| `gradlew setupServer`           | Create the the devserver, delete the folder yourself to make a complete reset! |
+| `gradlew runServer`             | Runs the devserver, use -Ddebug for opening a debugger and allow hot-swapping. |
+| `gradlew generateManifest`      | Generate the plugin manifest from settings and existing values.                |
 
 # Configuration
 
@@ -88,11 +113,11 @@ dependencies, like:
 ```kotlin
 common {
     dependencies {
-        compileOnly("dev.example.project:package:version") // <- Shared with all includes()
+        add("compileOnly", "dev.example.project:package:version") // <- Shared with all includes()
     }
     include("one", "two", "three") {
         dependencies {
-            compileOnly("dev.example.project:package:version") // <- Shared with the include group
+            add("compileOnly", "dev.example.project:package:version") // <- Shared with the include group
         }
     }
     include("four") // <- one, two, three automatically added here!
@@ -147,11 +172,11 @@ dependencies, like:
 ```kotlin
 hytale {
     dependencies {
-        compileOnly("dev.example.project:package:version") // <- Shared with all includes()
+        add("compileOnly", "dev.example.project:package:version") // <- Shared with all includes()
     }
     include("one", "two", "three") {
         dependencies {
-            compileOnly("dev.example.project:package:version") // <- Shared with the include group
+            add("compileOnly", "dev.example.project:package:version") // <- Shared with the include group
         }
     }
     include("four") // <- one, two, three automatically added here!
@@ -209,7 +234,7 @@ only need this agent, you can use it by adding:
 
 ```kotlin
 dependencies {
-    runtimeOnly("dev.scaffoldit:devtools:0.2.5")
+    runtimeOnly("dev.scaffoldit:devtools:0.2.+")
 }
 ```
 
