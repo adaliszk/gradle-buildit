@@ -6,7 +6,7 @@ package dev.scaffoldit.hytale.wire
 data class DevServerConfig(
     var Enabled: Boolean = true,
     var AllowOp: Boolean = true,
-    var OfflineMode: Boolean = true,
+    var OfflineMode: Boolean = false,
     var DisableSentry: Boolean = true,
     var AcceptEarlyPlugins: Boolean = false,
     var IncludeUserMods: Boolean = false,
