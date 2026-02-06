@@ -53,8 +53,10 @@ and flexible toolkit for mod development for Hytale, _and later for Minecraft._
 <!-- <td><b>CI/CI integration</b><br/> Generate popular pipelines for automation or have the hooks for custom solutions.</td> -->
 <!-- <td><b>Publishing to CurseForge</b><br/> Remove one more obstacle to distribute your mod by autmating the process.</td> -->
 
-> [!INFO]
-> Latest update: Fixed `runServer` usage thanks to @Sacramentix, and added offline mode to skip authentication
+> [!NOTE]
+> Latest update:
+> - Fixed `runServer` usage thanks to @Sacramentix
+> - Added offline mode to skip authentication
 
 ## Requirements
 
