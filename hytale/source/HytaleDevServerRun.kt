@@ -283,7 +283,7 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
     private fun createServerRunArgumentsList(): List<String> {
         val assetsFile = resolveAssets()
         val params = devserver.toArgs().toMutableList()
-        params.add("--assets=$assetsFile")
+        params.add("--assets=\"$assetsFile\"")
         val modPaths = mutableListOf<String>().also {
             it.add(sourcePath.absolutePath)
             if (devserver.IncludeUserMods) {
@@ -291,7 +291,7 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
                 it.add("${homePath}/UserData/Mods")
             }
         }
-        params.add("--mods=${modPaths.joinToString(",")}")
+        params.add("--mods=\"${modPaths.joinToString(",")}\"")
         return params
     }
 
