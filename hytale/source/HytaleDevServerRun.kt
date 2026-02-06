@@ -154,10 +154,10 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
         val version = HytaleExtension.version.replace("+", "latest")
 
         val downloadPath = homePath.resolve("$version/Assets.zip")
-        log.lifecycle("> Hytale :${project.name}.downloadPath: ${downloadPath.canonicalPath}")
+        log.debug("> Hytale :${project.name}.downloadPath: ${downloadPath.canonicalPath}")
 
         val installPath = homePath.resolve("install/$patchline/package/game/$version/Assets.zip")
-        log.lifecycle("> Hytale :${project.name}.installPath: ${installPath.canonicalPath}")
+        log.debug("> Hytale :${project.name}.installPath: ${installPath.canonicalPath}")
 
         return when (true) {
             downloadPath.exists() -> downloadPath
