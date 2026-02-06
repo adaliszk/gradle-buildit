@@ -182,16 +182,29 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
             .gradleProperty("env.hytale.devServerDCEVM")
             .getOrElse("true").toBoolean()
 
+        // Project access is forbidden from Gradle 10 onwards, so these need to be set outside
+        // the task context itself:
+
         val devserverPath = project.file(devserverDir)
+
         val runtimeClassPath = project.configurations.getByName("runtimeClasspath")
+        val projectOutput = project.extensions
+            .getByType(SourceSetContainer::class.java)
+            .getByName("main").output
+
         val jvmArguments = mutableListOf<String>()
         val javaProvider = resolveJava()
+
+        val manifestTask = project.tasks.named("generateManifest")
+        val buildTask = project.tasks.named("classes")
 
         val runServer = project.tasks.maybeCreate("runServer", JavaExec::class.java).apply {
             description = "Runs the devserver, use -Ddebug for opening a debugger and allow hot-swapping"
             group = "hytale"
+            dependsOn(manifestTask, buildTask)
+
             standardInput = System.`in`
-            classpath(runtimeClassPath)
+            classpath(projectOutput, runtimeClassPath)
             workingDir(devserverPath)
             mainClass.set("com.hypixel.hytale.Main")
 
@@ -220,7 +233,7 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
         }
 
         project.tasks.maybeCreate("devServer").apply {
-            description = "Alias for runServer (as mistakes were made with referencing things)"
+            description = "Alias for runServer for us who forget sometimes"
             group = "hytale"
             dependsOn(runServer)
         }
