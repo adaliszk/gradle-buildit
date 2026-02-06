@@ -161,6 +161,7 @@ use the RELEASE patchline with the "+" version, which means the latest.
 
 - `Enabled: Boolean`: Controls if the devserver should be generated at all. (default=true)
 - `AllowOp: Boolean`: Enables privileged server sessions for OP permissions. (default=true)
+- `OfflineMode: Boolean`: Disables server authentication for faster kick-off time. (default=false)
 - `DisableSentry: Boolean`: Avoids spamming Hypixel with modding errors. (default=true)
 - `AcceptEarlyPlugins: Boolean`: Sets your plugin to be loaded with the builtins (default=false)
 - `IncludeUserMods: Boolean`: Links the launcher global mods into the devserver (default=false)
