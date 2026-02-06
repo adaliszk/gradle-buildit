@@ -53,7 +53,7 @@ and flexible toolkit for mod development for Hytale, _and later for Minecraft._
 <!-- <td><b>Publishing to CurseForge</b><br/> Remove one more obstacle to distribute your mod by autmating the process.</td> -->
 
 > [!NOTE]
-> Latest update (`0.2.6 → 0.2.7`):
+> Latest update (`0.2.7 → 0.2.8`):
 > - Fixed missing `compileOnly` access in `dependencies` ([#2](https://github.com/adaliszk/gradle-scaffoldit-modkit/issues/2))
 > - Fixed plugin not being available in the `runServer` task ([#8](https://github.com/adaliszk/gradle-scaffoldit-modkit/issues/8))
 > - Disabled offline-mode as it is only meant for singleplayer ([#9](https://github.com/adaliszk/gradle-scaffoldit-modkit/issues/9))
