@@ -115,11 +115,11 @@ dependencies, like:
 ```kotlin
 common {
     dependencies {
-        add("compileOnly", "dev.example.project:package:version") // <- Shared with all includes()
+        compileOnly("dev.example.project:package:version") // <- Shared with all includes()
     }
     include("one", "two", "three") {
         dependencies {
-            add("compileOnly", "dev.example.project:package:version") // <- Shared with the include group
+            compileOnly("dev.example.project:package:version") // <- Shared with the include group
         }
     }
     include("four") // <- one, two, three automatically added here!
@@ -175,11 +175,11 @@ dependencies, like:
 ```kotlin
 hytale {
     dependencies {
-        add("compileOnly", "dev.example.project:package:version") // <- Shared with all includes()
+        compileOnly("dev.example.project:package:version") // <- Shared with all includes()
     }
     include("one", "two", "three") {
         dependencies {
-            add("compileOnly", "dev.example.project:package:version") // <- Shared with the include group
+            compileOnly("dev.example.project:package:version") // <- Shared with the include group
         }
     }
     include("four") // <- one, two, three automatically added here!

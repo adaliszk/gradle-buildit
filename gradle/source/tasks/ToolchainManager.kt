@@ -3,6 +3,7 @@
 package dev.scaffoldit.gradle.tasks
 
 import dev.scaffoldit.gradle.Gradle
+import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.artifacts.dsl.RepositoryHandler
@@ -36,10 +37,18 @@ class ToolchainManager : Gradle.ConfigureToolchain {
         pendingRepositoryChanges = action
     }
 
-    private var pendingDependencyChanges: (DependencyHandler.() -> Unit)? = null
+    override fun repositories(action: Action<RepositoryHandler>) {
+        pendingRepositoryChanges = { action.execute(this) }
+    }
 
-    override fun dependencies(action: DependencyHandler.() -> Unit) {
+    private var pendingDependencyChanges: (Gradle.ToolchainDependencyHandler.() -> Unit)? = null
+
+    override fun dependencies(action: Gradle.ToolchainDependencyHandler.() -> Unit) {
         pendingDependencyChanges = action
+    }
+
+    override fun dependencies(action: Action<Gradle.ToolchainDependencyHandler>) {
+        pendingDependencyChanges = { action.execute(this) }
     }
 
     // region Internal APIs
@@ -65,7 +74,9 @@ class ToolchainManager : Gradle.ConfigureToolchain {
         configureKotlin()
         includeWorkspacePackages()
         pendingRepositoryChanges?.let { project.repositories.apply(it) }
-        pendingDependencyChanges?.let { project.dependencies.apply(it) }
+        pendingDependencyChanges?.let {
+            Gradle.ToolchainDependencyHandler(project).apply(it)
+        }
 
         return this
     }
@@ -103,15 +114,17 @@ class ToolchainManager : Gradle.ConfigureToolchain {
                     )
                 )
 
-                if(project.providers
-                    .gradleProperty("env.java.compileSources")
-                    .getOrElse("true").toBoolean()) {
+                if (project.providers
+                        .gradleProperty("env.java.compileSources")
+                        .getOrElse("true").toBoolean()
+                ) {
                     ext.withSourcesJar()
                 }
 
-                if(project.providers
+                if (project.providers
                         .gradleProperty("env.java.compileDocs")
-                        .getOrElse("false").toBoolean()) {
+                        .getOrElse("false").toBoolean()
+                ) {
                     ext.withJavadocJar()
                 }
             }
