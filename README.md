@@ -158,7 +158,7 @@ classes itself to you.
 Configures the parent directory for the `hytale` workspaces, by default, it is set to `hytale`,
 reset it with an empty string to simply create all your projects in the repository root.
 
-#### `usePatchline(String)`, `patchline = Patchline`, `version: String`
+#### `usePatchline(String)`, `useVersion(String)`
 
 Configure which patchline from maven to depend on and within that which version. By default, it will
 use the RELEASE patchline with the "+" version, which means the latest.
