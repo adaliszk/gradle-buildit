@@ -264,7 +264,7 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
                     ) { config ->
                         config.mainClass = "com.hypixel.hytale.Main"
                         config.moduleName = "${mainPackage}.main".removePrefix(".")
-                        config.programParameters = createServerRunArguments()
+                        config.programParameters = createServerRunArgumentsString()
                         config.workingDirectory = project.file(devserverDir).absolutePath
                         if (javaProvider.hasDCEVM && devServerDCEVM) {
                             config.jvmArgs = "-XX:+AllowEnhancedClassRedefinition"
@@ -275,14 +275,22 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
         }
     }
 
-    private fun createServerRunArguments(): String {
-        return createServerRunArgumentsList().joinToString(" ")
+    private fun createServerRunArgumentsString(): String {
+        return createServerRunArguments().map { (key, value) ->
+            if (value != null) "$key=${value.quotedIfNeeded()}" else key
+        }.joinToString(" ")
     }
 
     private fun createServerRunArgumentsList(): List<String> {
+        return createServerRunArguments().map { (key, value) ->
+            if (value != null) "$key=${value}" else key
+        }
+    }
+
+    private fun createServerRunArguments(): Map<String, String?> {
         val assetsFile = resolveAssets()
-        val params = devserver.toArgs().toMutableList()
-        params.add("--assets=${assetsFile.canonicalPath.quotedIfNeeded()}")
+        val params = devserver.toArgs().toMutableMap()
+        params["--assets"] = "${assetsFile.canonicalPath}"
         val modPaths = mutableListOf<String>().also {
             it.add(sourcePath.canonicalPath)
             if (devserver.IncludeUserMods) {
@@ -290,8 +298,8 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
                 it.add(File("${homePath}/UserData/Mods").canonicalPath)
             }
         }
-        params.add("--mods=${modPaths.joinToString(",").quotedIfNeeded()}")
-        return params
+        params["--mods"] = modPaths.joinToString(",")
+        return params.toMap()
     }
 
     private fun String.quotedIfNeeded(): String =

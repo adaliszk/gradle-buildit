@@ -17,5 +17,8 @@ data class DevServerConfig(
         ::AcceptEarlyPlugins to "--accept-early-plugins",
         ::DevelopmentMode to "--auth-mode=insecure",
     ).filter { it.key.get() }
-        .values.toList()
+        .values.associate { arg ->
+            val parts = arg.split('=', limit = 2)
+            parts[0] to parts.getOrNull(1)
+        }
 }
