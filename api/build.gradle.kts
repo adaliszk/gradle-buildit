@@ -1,11 +1,11 @@
-plugins {
-    kotlin("jvm")
-    `java-library`
-}
-
 extra["packageName"] = "ScaffoldIt API"
 description =
     "Provides interfaces and generic handlers for wiring components and systems via delegation."
+
+plugins {
+    kotlin("jvm") version "2.3.10"
+    kotlin("plugin.serialization") version "2.3.10"
+}
 
 repositories {
     mavenLocal()

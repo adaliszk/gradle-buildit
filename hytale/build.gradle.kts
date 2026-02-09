@@ -1,13 +1,12 @@
-plugins {
-    kotlin("jvm")
-    kotlin("plugin.serialization") version "2.3.0"
-    id("org.jetbrains.gradle.plugin.idea-ext") version "1.3"
-}
-
 extra["packageName"] = "ScaffoldIt Hytale Gradle"
 description =
     "Registers project and setting extensions for hytale Gradle scopes where the actual mods are implemented."
 
+plugins {
+    kotlin("jvm") version "2.3.10"
+    kotlin("plugin.serialization") version "2.3.10"
+    id("org.jetbrains.gradle.plugin.idea-ext") version "1.3"
+}
 
 repositories {
     mavenLocal()
