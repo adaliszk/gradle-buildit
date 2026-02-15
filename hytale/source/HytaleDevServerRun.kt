@@ -215,6 +215,8 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
 
             javaLauncher.set(javaProvider.jdk)
 
+            jvmArgs(jvmArguments)
+
             val serverArgs = createServerRunArgumentsList()
             args(serverArgs)
 
