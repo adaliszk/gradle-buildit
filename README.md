@@ -53,14 +53,12 @@ and flexible toolkit for mod development for Hytale, _and later for Minecraft._
 <!-- <td><b>Publishing to CurseForge</b><br/> Remove one more obstacle to distribute your mod by autmating the process.</td> -->
 
 > [!NOTE]
-> Latest update (`0.2.7 → 0.2.9`):
-> - Fixed missing `compileOnly` access in `dependencies` ([#2](https://github.com/adaliszk/gradle-scaffoldit-modkit/issues/2))
-> - Fixed plugin not being available in the `runServer` task ([#8](https://github.com/adaliszk/gradle-scaffoldit-modkit/issues/8))
-> - Disabled offline-mode as it is only meant for singleplayer ([#9](https://github.com/adaliszk/gradle-scaffoldit-modkit/issues/9))
-> - Fixed missing arguments for `runServer` task ([#10](https://github.com/adaliszk/gradle-scaffoldit-modkit/issues/10))
-> - Fixed `usePatchline` and `useVersion` not applying the desired configuration
-> - Shelved offline-mode devserver as DevelopmentMode for the future when it's available
-> - Fixed missed quotation around Asset and Mods paths, only when spaces detected
+> Latest update (`0.2.9 → 0.2.10`):
+> - Upgraded to Kotlin 2.3.10
+> - Fix quotation usage to IDEA configuration where it is necessary ([#12](https://github.com/adaliszk/gradle-scaffoldit-modkit/issues/12))
+> - Added automatic semver matcher to avoid wrong version pinning
+> - Separated the Assets.zip resolution to allow builds without it ([#18](https://github.com/adaliszk/gradle-scaffoldit-modkit/issues/18))
+> - Separate Toolchain and Project plugins to avoid immutable errors ([#13](https://github.com/adaliszk/gradle-scaffoldit-modkit/issues/13))
 
 See the whole [CHANGELOG](CHANGELOG.md)
 
