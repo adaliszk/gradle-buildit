@@ -3,6 +3,7 @@
 package dev.scaffoldit.hytale.wire
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import kotlinx.serialization.json.Json
 import org.gradle.api.Project
 import org.gradle.api.tasks.SourceSetContainer
@@ -26,7 +27,10 @@ data class HytaleManifest(
     var ServerVersion: String = "*",
     var Main: String? = null,
     var SubPlugins: List<HytaleManifest>? = null,
+    @Transient
+    var ManifestFile: File? = null,
 ) {
+
     @Serializable
     data class Author(
         val Name: String,
@@ -34,9 +38,16 @@ data class HytaleManifest(
         val Url: String? = null,
     )
 
+    fun save(): Boolean {
+        return ManifestFile?.let { saveTo(it) } ?: false
+    }
+
     fun saveTo(project: Project): Boolean {
+        return saveTo(findManifestFile(project))
+    }
+
+    fun saveTo(file: File): Boolean {
         return runCatching {
-            val file = findManifestFile(project)
             file.parentFile.mkdirs()
             file.writeText(json.encodeToString(serializer(), this))
             true
@@ -97,7 +108,8 @@ data class HytaleManifest(
             val projectVersion = project.version.toString()
                 .replace("unspecified", "0.0.0")
 
-            val current = findManifestFile(project).let { file ->
+            val manifestFile = findManifestFile(project)
+            val current = manifestFile.let { file ->
                 if (file.exists()) {
                     json.decodeFromString(serializer(), file.readText())
                 } else {
@@ -157,7 +169,8 @@ data class HytaleManifest(
                         ?: current.Main
                         ?: "${mainPackage}.${mainClassName}",
                     SubPlugins = properties["hytaleSub"] as? List<HytaleManifest>
-                        ?: current.SubPlugins
+                        ?: current.SubPlugins,
+                    ManifestFile = manifestFile,
                 )
             }
         }
