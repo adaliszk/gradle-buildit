@@ -1,6 +1,14 @@
+## 0.2.10
+
+- Upgraded to Kotlin 2.3.10
+- Fix quotation usage to IDEA configuration where it is necessary ([#12](https://github.com/adaliszk/gradle-scaffoldit-modkit/issues/12))
+- Added automatic semver matcher to avoid wrong version pinning
+- Separated the Assets.zip resolution to allow builds without it ([#18](https://github.com/adaliszk/gradle-scaffoldit-modkit/issues/18))
+- Separate Toolchain and Project plugins to avoid immutable errors ([#13](https://github.com/adaliszk/gradle-scaffoldit-modkit/issues/13))
+
 ## 0.2.9
 
-- Changed quotation to only apply ONLY when spaces are found in paths
+- Changed quotation to only apply when spaces are found in paths
 
 ## 0.2.8
 
