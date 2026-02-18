@@ -64,13 +64,13 @@ class HytaleServerPlatform() : HytaleGradle.ConfigurePlatform {
             .getOrElse("true").toBoolean()
         if (!manifestGenerator) return
 
-        val scope = project
+        val manifest = HytaleManifest.from(project)
         with(project.tasks) {
             val generateManifest = maybeCreate("generateManifest").apply {
                 description = "Generate the plugin manifest from settings and existing values."
                 group = "hytale"
                 doFirst {
-                    HytaleManifest.from(scope).saveTo(scope)
+                    manifest.save()
                 }
             }
             named("processResources", Copy::class.java) { task ->

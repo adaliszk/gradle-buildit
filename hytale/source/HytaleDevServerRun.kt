@@ -52,35 +52,7 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
 
         registerSetupTask()
         registerRunTask()
-
-        val manifest = HytaleManifest.from(project)
-
-        val packageCandidates = listOfNotNull(
-            manifest.Main?.substringBeforeLast("."),
-            "${project.group}.${project.name}".replace(":", ".").trim('.'),
-            "${project.rootProject.name}",
-        )
-
-        project.afterEvaluate { scope ->
-            if (scope.path !== project.path) return@afterEvaluate
-
-            with(project.gradle.rootProject) {
-                plugins.apply(IdeaExtPlugin::class.java)
-                extensions.configure<IdeaModel>("idea") { idea ->
-                    idea.project.settings.runConfigurations {
-                        val config = withType(Application::class.java).firstOrNull {
-                            packageCandidates.contains("${it.moduleName}.main")
-                        }
-
-                        if (config == null) {
-                            val task = project.tasks.named("setupServer").get()
-                            task.actions.forEach { it.execute(task) }
-                            generateIdeaRunConfiguration()
-                        }
-                    }
-                }
-            }
-        }
+        configureIdea()
 
         return this
     }
@@ -114,8 +86,44 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
         project.tasks.maybeCreate("setupServer").apply {
             description = "(Re-)Create the the devserver within the project"
             group = "hytale"
-            bootstrapDevserver()
-            bootstrapAssets()
+            doLast {
+                bootstrapDevserver()
+                bootstrapAssets()
+            }
+        }
+    }
+
+    private fun isIdeaSync(): Boolean {
+        // IntelliJ sets these during Gradle sync
+        return System.getProperty("idea.sync.active")?.toBoolean() == true
+            || project.gradle.startParameter.taskNames.any {
+            it.contains("idea", ignoreCase = true) || it.contains("processIdeaSettings")
+        }
+    }
+
+    fun configureIdea() {
+        if (!isIdeaSync()) return
+
+        val manifest = HytaleManifest.from(project)
+        val packageCandidates = listOfNotNull(
+            manifest.Main?.substringBeforeLast("."),
+            "${project.group}.${project.name}".replace(":", ".").trim('.'),
+            "${project.rootProject.name}",
+        )
+
+        project.plugins.apply(IdeaExtPlugin::class.java)
+        project.extensions.configure<IdeaModel>("idea") { idea ->
+            idea.project.settings.runConfigurations {
+                val config = withType(Application::class.java).firstOrNull {
+                    packageCandidates.contains("${it.moduleName}.main")
+                }
+
+                if (config == null) {
+                    val task = project.tasks.named("setupServer").get()
+                    task.actions.forEach { it.execute(task) }
+                    generateIdeaRunConfiguration()
+                }
+            }
         }
     }
 
@@ -211,16 +219,16 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
             if (System.getProperty("debug") != null) {
                 jvmArguments.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005")
                 jvmArguments.add("-XX:+AllowEnhancedClassRedefinition")
+                jvmArguments.add("-XX:+EnableDynamicAgentLoading")
             }
 
             javaLauncher.set(javaProvider.jdk)
-
             jvmArgs(jvmArguments)
 
-            val serverArgs = createServerRunArgumentsList()
-            args(serverArgs)
+            doLast {
+                val serverArgs = createServerRunArgumentsList()
+                args(serverArgs)
 
-            doFirst {
                 log.lifecycle("> Hytale: :runServer:$serverArgs")
                 if (!devserverPath.exists()) {
                     throw GradleException(
@@ -267,7 +275,7 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
                         config.programParameters = createServerRunArgumentsString()
                         config.workingDirectory = project.file(devserverDir).absolutePath
                         if (javaProvider.hasDCEVM && devServerDCEVM) {
-                            config.jvmArgs = "-XX:+AllowEnhancedClassRedefinition"
+                            config.jvmArgs = "-XX:+AllowEnhancedClassRedefinition -XX:+EnableDynamicAgentLoading"
                         }
                     }
                 }
