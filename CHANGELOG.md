@@ -1,3 +1,7 @@
+## 0.2.11
+
+- Drop automatic semver matcher as it's counter-intuitive
+
 ## 0.2.10
 
 - Upgraded to Kotlin 2.3.10
