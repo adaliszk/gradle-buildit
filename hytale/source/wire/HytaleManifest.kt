@@ -128,6 +128,11 @@ data class HytaleManifest(
 
             val mainClassName: String = projectName
 
+            val serverVersion = project.extra.properties.deserialize(
+                "hytaleServerVersion",
+                current.ServerVersion
+            )
+
             with(project.extra) {
                 @Suppress("UNCHECKED_CAST") // The type here _should_ be correct
                 return current.copy(
@@ -161,10 +166,10 @@ data class HytaleManifest(
                         "hytaleLoadBefore",
                         current.LoadBefore
                     ),
-                    ServerVersion = properties.deserialize(
-                        "hytaleServerVersion",
-                        current.ServerVersion
-                    ),
+                    ServerVersion = when {
+                        serverVersion.matches(Regex("^[><=~^*].*")) -> serverVersion
+                        else -> "=$serverVersion"
+                    },
                     Main = properties["hytaleMain"] as? String
                         ?: current.Main
                         ?: "${mainPackage}.${mainClassName}",
