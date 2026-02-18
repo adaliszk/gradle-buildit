@@ -5,7 +5,6 @@ package dev.scaffoldit.gradle.tasks
 import dev.scaffoldit.gradle.Gradle
 import org.gradle.api.Action
 import org.gradle.api.Project
-import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.tasks.compile.JavaCompile
@@ -14,7 +13,6 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 import org.gradle.api.logging.Logger
-import org.gradle.internal.extensions.core.extra
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import org.gradle.api.logging.Logging as GradleLogger
 
@@ -28,7 +26,7 @@ class ToolchainManager : Gradle.ConfigureToolchain {
     override fun useKotlin(dependencyNotation: String?) {
         kotlin = dependencyNotation ?: "org.jetbrains.kotlin:kotlin-stdlib"
         log.debug("ToolchainManager.useKotlin($kotlin)")
-        if (::project.isInitialized) configureKotlin()
+        if (::project.isInitialized) configureKotlinToolchain()
     }
 
     private var pendingRepositoryChanges: (RepositoryHandler.() -> Unit)? = null
@@ -68,15 +66,13 @@ class ToolchainManager : Gradle.ConfigureToolchain {
         log.debug("ToolchainManager.configure(kotlin=$kotlin)")
         this.project = project
 
-        configurePlugins()
         configureRepositories()
-        configureToolchain()
-        configureKotlin()
+        configureToolchainPlugins()
+        configureJavaToolchain()
+        configureKotlinToolchain()
+        configureWorkspacePlugins()
         includeWorkspacePackages()
-        pendingRepositoryChanges?.let { project.repositories.apply(it) }
-        pendingDependencyChanges?.let {
-            Gradle.ToolchainDependencyHandler(project).apply(it)
-        }
+        applyPendingConfigs()
 
         return this
     }
@@ -94,15 +90,20 @@ class ToolchainManager : Gradle.ConfigureToolchain {
         }
     }
 
-    private fun configurePlugins() {
+    private fun configureToolchainPlugins() {
         with(project.pluginManager) {
             apply("java-library")
+        }
+    }
+
+    private fun configureWorkspacePlugins() {
+        with(project.pluginManager) {
             apply("org.gradle.maven-publish")
             apply("org.gradle.signing")
         }
     }
 
-    private fun configureToolchain() {
+    private fun configureJavaToolchain() {
         with(project.extensions) {
             configure(JavaPluginExtension::class.java) { ext ->
                 ext.toolchain.languageVersion.set(
@@ -140,7 +141,7 @@ class ToolchainManager : Gradle.ConfigureToolchain {
         }
     }
 
-    private fun configureKotlin() {
+    private fun configureKotlinToolchain() {
         val kotlinSupport = project.providers
             .gradleProperty("env.scaffoldit.kotlinSupport")
             .getOrElse("true").toBoolean()
@@ -183,6 +184,13 @@ class ToolchainManager : Gradle.ConfigureToolchain {
             NestedProjects.included.forEach {
                 add("implementation", project.project(it))
             }
+        }
+    }
+
+    private fun applyPendingConfigs() {
+        pendingRepositoryChanges?.let { project.repositories.apply(it) }
+        pendingDependencyChanges?.let {
+            Gradle.ToolchainDependencyHandler(project).apply(it)
         }
     }
 }
