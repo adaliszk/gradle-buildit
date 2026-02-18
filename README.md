@@ -53,10 +53,9 @@ and flexible toolkit for mod development for Hytale, _and later for Minecraft._
 <!-- <td><b>Publishing to CurseForge</b><br/> Remove one more obstacle to distribute your mod by autmating the process.</td> -->
 
 > [!NOTE]
-> Latest update (`0.2.9 → 0.2.10`):
+> Latest update (`0.2.9 → 0.2.11`):
 > - Upgraded to Kotlin 2.3.10
 > - Fix quotation usage to IDEA configuration where it is necessary ([#12](https://github.com/adaliszk/gradle-scaffoldit-modkit/issues/12))
-> - Added automatic semver matcher to avoid wrong version pinning
 > - Separated the Assets.zip resolution to allow builds without it ([#18](https://github.com/adaliszk/gradle-scaffoldit-modkit/issues/18))
 > - Separate Toolchain and Project plugins to avoid immutable errors ([#13](https://github.com/adaliszk/gradle-scaffoldit-modkit/issues/13))
 
