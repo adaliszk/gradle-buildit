@@ -1,4 +1,4 @@
-rootProject.name = "dev.scaffoldit.examples.java"
+rootProject.name = "dev.scaffoldit.example.java"
 
 pluginManagement {
     includeBuild("../..")
@@ -9,9 +9,20 @@ plugins {
 }
 
 hytale {
+    // usePatchline("pre-release")
+
+    repositories {
+        maven("https://repo.codemc.io/repository/creatorfromhell")
+    }
+
+    dependencies {
+        compileOnly("net.cfh.vault:VaultUnlocked:2.18.3")
+    }
+
     manifest {
         Group = "ScaffoldIt"
         Name = "Example"
-        Main = "dev.scaffoldit.example.JavaExample"
+        Main = "dev.scaffoldit.example.java.JavaExample"
+        // ServerVersion = "2026.02.06-0baf7c5aa"
     }
 }

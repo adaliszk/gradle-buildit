@@ -1,14 +1,18 @@
-rootProject.name = "dev.scaffoldit.examples.kotlin"
+rootProject.name = "dev.scaffoldit.example.kotlin"
+
+pluginManagement {
+    includeBuild("../..")
+}
 
 plugins {
-    id("dev.scaffoldit") version "0.2.3"
+    id("dev.scaffoldit") // version "0.2.3"
 }
 
 hytale {
-    useKotlin()
+    useKotlin("curse.maven:kytale-1428431:7464573")
     manifest {
         Group = "ScaffoldIt"
         Name = "Example"
-        Main = "dev.scaffoldit.example.KotlinExample"
+        Main = "dev.scaffoldit.example.kotlin.KotlinExample"
     }
 }

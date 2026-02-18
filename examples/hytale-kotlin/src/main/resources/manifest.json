@@ -7,5 +7,5 @@
     "DisabledByDefault": false,
     "IncludesAssetPack": true,
     "ServerVersion": "*",
-    "Main": "dev.scaffoldit.example.KotlinExample"
+    "Main": "dev.scaffoldit.example.kotlin.KotlinExample"
 }

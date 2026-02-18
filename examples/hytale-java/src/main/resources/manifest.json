@@ -1,11 +1,11 @@
 {
     "Group": "ScaffoldIt",
     "Name": "Example",
-    "Version": "0.0.0",
+    "Version": "0.1.0",
     "Description": "Fantastic mod, beautiful mechanics... people are saying it's amazing.",
     "Authors": [],
     "DisabledByDefault": false,
     "IncludesAssetPack": true,
     "ServerVersion": "*",
-    "Main": "dev.scaffoldit.example.JavaExample"
+    "Main": "dev.scaffoldit.example.java.JavaExample"
 }
