@@ -54,12 +54,13 @@ and flexible toolkit for mod development for Hytale, _and later for Minecraft._
 <!-- <td><b>Publishing to CurseForge</b><br/> Remove one more obstacle to distribute your mod by autmating the process.</td> -->
 
 > [!NOTE]
-> Latest update (`0.2.9 → 0.2.12`):
+> Latest update (`0.2.9 → 0.2.13`):
 > - Upgraded to Kotlin 2.3.10
 > - Fix quotation usage to IDEA configuration where it is necessary ([#12](https://github.com/adaliszk/gradle-scaffoldit-modkit/issues/12))
 > - Separated the Assets.zip resolution to allow builds without it ([#18](https://github.com/adaliszk/gradle-scaffoldit-modkit/issues/18))
 > - Separate Toolchain and Project plugins to avoid immutable errors ([#13](https://github.com/adaliszk/gradle-scaffoldit-modkit/issues/13))
 > - Fix :setupServer evaluation error ([#21](https://github.com/adaliszk/gradle-scaffoldit-modkit/issues/21))
+> - Fix IDEA configuration NPE with multi-module setup ([#22](https://github.com/adaliszk/gradle-scaffoldit-modkit/issues/22))
 
 See the whole [CHANGELOG](CHANGELOG.md)
 
@@ -307,6 +308,7 @@ JetBrains Runtime, or any other DCEVM enabled runtime.
 Run the `:setupServer` task to create a fresh `devserver` folder.
 
 > Skipping pack at ...: missing or invalid manifest.json
+> 
 > [Universe|P] Failed to setup plugin Hytale:...
 
 Check if you use any registration or dependency to Hytale plugins in your `setup()` function without

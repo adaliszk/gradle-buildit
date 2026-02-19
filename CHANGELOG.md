@@ -1,3 +1,7 @@
+## 0.2.13
+
+- Fix IDEA configuration NPE with multi-module setup ([#22](https://github.com/adaliszk/gradle-scaffoldit-modkit/issues/22))
+
 ## 0.2.12
 
 - Fix :setupServer evaluation error ([#21](https://github.com/adaliszk/gradle-scaffoldit-modkit/issues/21))

@@ -113,7 +113,8 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
 
         project.plugins.apply(IdeaExtPlugin::class.java)
         project.extensions.configure<IdeaModel>("idea") { idea ->
-            idea.project.settings.runConfigurations {
+            val ideaProject = idea.project ?: return@configure
+            ideaProject.settings.runConfigurations {
                 val config = withType(Application::class.java).firstOrNull {
                     packageCandidates.contains("${it.moduleName}.main")
                 }
