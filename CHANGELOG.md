@@ -1,3 +1,7 @@
+## 0.2.12
+
+- Fix :setupServer evaluation error ([#21](https://github.com/adaliszk/gradle-scaffoldit-modkit/issues/21))
+
 ## 0.2.11
 
 - Drop automatic semver matcher as it's counter-intuitive

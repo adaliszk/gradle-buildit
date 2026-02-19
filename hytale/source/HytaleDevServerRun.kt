@@ -128,17 +128,15 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
     }
 
     private fun bootstrapDevserver() {
-        project.afterEvaluate {
-            if (!devserver.Enabled) return@afterEvaluate
+        if (!devserver.Enabled) return
 
-            val serverRunDir = project.file(devserverDir)
-            if (serverRunDir.mkdirs()) {
-                javaClass.getResourceAsStream("/server.zip")?.use { stream ->
-                    project.zipTree(
-                        project.file("temp.zip").apply { writeBytes(stream.readBytes()) })
-                        .let { tree -> project.copy { it.from(tree); it.into(serverRunDir) } }
-                        .also { project.delete("temp.zip") }
-                }
+        val serverRunDir = project.file(devserverDir)
+        if (serverRunDir.mkdirs()) {
+            javaClass.getResourceAsStream("/server.zip")?.use { stream ->
+                project.zipTree(
+                    project.file("temp.zip").apply { writeBytes(stream.readBytes()) })
+                    .let { tree -> project.copy { it.from(tree); it.into(serverRunDir) } }
+                    .also { project.delete("temp.zip") }
             }
         }
     }
