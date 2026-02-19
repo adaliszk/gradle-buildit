@@ -5,7 +5,7 @@
     "Description": "Fantastic mod, beautiful mechanics... people are saying it's amazing.",
     "Authors": [],
     "DisabledByDefault": false,
-    "IncludesAssetPack": true,
-    "ServerVersion": "*",
+    "IncludesAssetPack": false,
+    "ServerVersion": "2026.02.18-f3b8fff95",
     "Main": "dev.scaffoldit.example.java.JavaExample"
 }

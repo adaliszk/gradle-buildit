@@ -200,6 +200,9 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
         val manifestTask = project.tasks.named("generateManifest")
         val buildTask = project.tasks.named("classes")
 
+        val serverArgs = createServerRunArgumentsList()
+        log.lifecycle("> Hytale: :runServer:$serverArgs")
+
         val runServer = project.tasks.maybeCreate("runServer", JavaExec::class.java).apply {
             description =
                 "Runs the devserver, use -Ddebug for opening a debugger and allow hot-swapping"
@@ -207,7 +210,7 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
             dependsOn(manifestTask, buildTask)
 
             standardInput = System.`in`
-            classpath(projectOutput, runtimeClassPath)
+            classpath(runtimeClassPath, projectOutput)
             workingDir(devserverPath)
             mainClass.set("com.hypixel.hytale.Main")
 
@@ -218,17 +221,15 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
             if (System.getProperty("debug") != null) {
                 jvmArguments.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005")
                 jvmArguments.add("-XX:+AllowEnhancedClassRedefinition")
-                jvmArguments.add("-XX:+EnableDynamicAgentLoading")
             }
 
             javaLauncher.set(javaProvider.jdk)
+
+            jvmArguments.add("-XX:+EnableDynamicAgentLoading")
             jvmArgs(jvmArguments)
+            args(serverArgs)
 
             doLast {
-                val serverArgs = createServerRunArgumentsList()
-                args(serverArgs)
-
-                log.lifecycle("> Hytale: :runServer:$serverArgs")
                 if (!devserverPath.exists()) {
                     throw GradleException(
                         "Devserver has not been initialized in $devserverDir yet, " +

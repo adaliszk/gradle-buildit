@@ -13,9 +13,9 @@ import java.io.File
 @Suppress("PropertyName") // This is how the JSON is structured, so we reflect that!
 @Serializable
 data class HytaleManifest(
-    var Group: String? = null,
-    var Name: String? = null,
-    var Version: String? = null,
+    var Group: String,
+    var Name: String,
+    var Version: String,
     var Description: String? = null,
     var Authors: List<Author> = emptyList(),
     var Website: String? = null,
@@ -24,7 +24,7 @@ data class HytaleManifest(
     var Dependencies: Map<String, String>? = null,
     var OptionalDependencies: Map<String, String>? = null,
     var LoadBefore: Map<String, String>? = null,
-    var ServerVersion: String = "*",
+    var ServerVersion: String? = null,
     var Main: String? = null,
     var SubPlugins: List<HytaleManifest>? = null,
     @Transient
@@ -33,7 +33,7 @@ data class HytaleManifest(
 
     @Serializable
     data class Author(
-        val Name: String,
+        val Name: String? = null,
         val Email: String? = null,
         val Url: String? = null,
     )
@@ -105,8 +105,10 @@ data class HytaleManifest(
                 .filter { it.isLetterOrDigit() }
                 .replaceFirstChar { it.uppercase() }
                 .ifBlank { "NameMe" }
-            val projectVersion = project.version.toString()
-                .replace("unspecified", "0.0.0")
+            val projectVersion = when {
+                project.version.toString() != "unspecified" -> project.version.toString()
+                else -> null
+            }
 
             val manifestFile = findManifestFile(project)
             val current = manifestFile.let { file ->
@@ -116,7 +118,7 @@ data class HytaleManifest(
                     HytaleManifest(
                         Group = projectGroup,
                         Name = projectName,
-                        Version = projectVersion,
+                        Version = projectVersion ?: "0.0.0",
                     )
                 }
             }
@@ -138,8 +140,8 @@ data class HytaleManifest(
                         ?: current.Name
                         ?: projectName,
                     Version = properties["hytaleVersion"] as? String
-                        ?: current.Version
-                        ?: projectVersion,
+                        ?: projectVersion
+                        ?: current.Version,
                     Description = properties["hytaleDescription"] as? String
                         ?: current.Description,
                     Authors = properties.deserialize("hytaleAuthors", current.Authors),

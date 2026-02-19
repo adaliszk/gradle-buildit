@@ -23,6 +23,6 @@ hytale {
         Group = "ScaffoldIt"
         Name = "Example"
         Main = "dev.scaffoldit.example.java.JavaExample"
-        // ServerVersion = "2026.02.06-0baf7c5aa"
+        ServerVersion = "2026.02.18-f3b8fff95"
     }
 }

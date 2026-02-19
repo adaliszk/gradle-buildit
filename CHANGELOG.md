@@ -1,3 +1,7 @@
+## 0.2.14
+
+- Fix :runServer missing CLI arguments (missing HytaleAssets shutdown)
+
 ## 0.2.13
 
 - Fix IDEA configuration NPE with multi-module setup ([#22](https://github.com/adaliszk/gradle-scaffoldit-modkit/issues/22))

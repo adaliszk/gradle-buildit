@@ -1,7 +1,7 @@
 {
     "Group": "ScaffoldIt",
     "Name": "Devtools",
-    "Version": "0.1.5",
+    "Version": "0.2.14",
     "Authors": [
         {
             "Name": "Kicsivazz",
@@ -11,6 +11,9 @@
     ],
     "DisabledByDefault": false,
     "IncludesAssetPack": false,
-    "ServerVersion": "*",
-    "Main": "dev.scaffoldit.devtools.HytaleDevtoolsPlugin"
+    "ServerVersion": "2026.02.18-f3b8fff95",
+    "Main": "dev.scaffoldit.devtools.HytaleDevtoolsPlugin",
+    "Dependencies": {
+        "Hytale:Universe": ">=2026.02.18-f3b8fff95"
+    }
 }
