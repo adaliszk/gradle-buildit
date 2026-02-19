@@ -181,8 +181,10 @@ class ToolchainManager : Gradle.ConfigureToolchain {
         if (!monorepoAutoDepends) return
 
         with(project.dependencies) {
-            NestedProjects.included.forEach {
-                add("implementation", project.project(it))
+            for (it in NestedProjects.included) {
+                val dependency = project.project(it)
+                if (dependency.path === project.path) break
+                add("implementation", dependency)
             }
         }
     }
