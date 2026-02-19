@@ -1,11 +1,12 @@
 <div align="center">
 
-# Scaffoldit Gradle Plugin
+# ![Scaffoldit Gradle Plugin](web/assets/logo-text.png)
 
-[![Java](https://img.shields.io/badge/Java-25_0-orange?style=for-the-badge)](https://openjdk.org)
-[![Kotlin](https://img.shields.io/badge/Kotlin-2_3-7F52FF?style=for-the-badge)](https://kotlinlang.org)
-[![Gradle](https://img.shields.io/badge/Gradle-9_2-1BA8CB?style=for-the-badge)](https://gradle.org)
-[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
+[![Latest](https://img.shields.io/maven-central/v/dev.scaffoldit/dev.scaffoldit.gradle.plugin?label=plugin&color=blue&style=for-the-badge)](https://central.sonatype.com/artifact/dev.scaffoldit/dev.scaffoldit)
+[![Java](https://img.shields.io/badge/Java-v25.0-bf710a?style=for-the-badge)](https://openjdk.org)
+[![Kotlin](https://img.shields.io/badge/Kotlin-v2.3-7F52FF?style=for-the-badge)](https://kotlinlang.org)
+[![Gradle](https://img.shields.io/badge/Gradle-v9.2-1BA8CB?style=for-the-badge)](https://gradle.org)
+[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE.md)
 
 <!--
 [![Docs](https://img.shields.io/badge/Docs-blue?style=for-the-badge)](https://scaffoldit.dev)
@@ -53,11 +54,12 @@ and flexible toolkit for mod development for Hytale, _and later for Minecraft._
 <!-- <td><b>Publishing to CurseForge</b><br/> Remove one more obstacle to distribute your mod by autmating the process.</td> -->
 
 > [!NOTE]
-> Latest update (`0.2.9 → 0.2.11`):
+> Latest update (`0.2.9 → 0.2.12`):
 > - Upgraded to Kotlin 2.3.10
 > - Fix quotation usage to IDEA configuration where it is necessary ([#12](https://github.com/adaliszk/gradle-scaffoldit-modkit/issues/12))
 > - Separated the Assets.zip resolution to allow builds without it ([#18](https://github.com/adaliszk/gradle-scaffoldit-modkit/issues/18))
 > - Separate Toolchain and Project plugins to avoid immutable errors ([#13](https://github.com/adaliszk/gradle-scaffoldit-modkit/issues/13))
+> - Fix :setupServer evaluation error ([#21](https://github.com/adaliszk/gradle-scaffoldit-modkit/issues/21))
 
 See the whole [CHANGELOG](CHANGELOG.md)
 
@@ -216,7 +218,7 @@ your built jar file.
 - `Dependencies: Map<Group:Name, VersionRange>?`: What needs to "SETUP" with your plugin.
 - `OptionalDependencies: Map<Group:Name, VersionRange>?`: What needs exist but no matter what state.
 - `LoadBefore: Map<Group:Name, VersionRange>?`: Moves your plugin to load before the first of these.
-- `ServerVersion: VersionRange`: Version matcher, e.g., ">=1.0.0".
+- `ServerVersion: String`: Server Version, e.g., "1.0.0".
 - `Main: String`: Your main class full name to be loaded from classpath.
 - `SubPlugins: List<HytaleManifest>?`: Same manifest as above to configure any sub-plugins.
 
@@ -280,6 +282,37 @@ env.hytale.configureIdea=true
 # Example: D:\\HYTALE\\Data
 hytale.home_path=""
 ```
+
+# Troubleshooting
+
+> Assets are not present, without that it is not possible to run a server!
+
+Add or Edit your `gradle.properties` file with the `hytale.home_path=` option pointing towards your
+installation folder that contains the `install` path. For example: `D:/HYTALE/Data`.
+
+> Could not target platform: '...' using tool chain: '...'.
+
+Check that Java 25 is installed and configured under `File → Project Structure → SDKs`, use JetBrains
+Runtimeis, or any other DVEVM enabled runtime. You may also need to edit the `project:devserver` run
+configuration and choose your project default or JBR.
+
+> After a code change, the Hot-reload does not reload your plugin.
+
+With IDEA, verify that you are using the generated `project:devserver` run configuration in DEBUG mode.
+With any other, verify that the `:runServer` task does have a `-Ddebug` flag and the used JDK is
+JetBrains Runtime, or any other DCEVM enabled runtime.
+
+> Devserver has not been initialized in ... yet
+
+Run the `:setupServer` task to create a fresh `devserver` folder.
+
+> Skipping pack at ...: missing or invalid manifest.json
+> [Universe|P] Failed to setup plugin Hytale:...
+
+Check if you use any registration or dependency to Hytale plugins in your `setup()` function without
+depending on the Hytale plugin in your `manifest.json`. Add any that you found missing to ensure the
+development plugin loads in the right order.
+
 
 # Contributions
 
