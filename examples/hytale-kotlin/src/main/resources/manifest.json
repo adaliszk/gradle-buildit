@@ -5,7 +5,10 @@
     "Description": "Fantastic mod, beautiful mechanics... people are saying it's amazing.",
     "Authors": [],
     "DisabledByDefault": false,
-    "IncludesAssetPack": true,
+    "IncludesAssetPack": false,
+    "Dependencies": {
+        "AmoAster:Kytale": "*"
+    },
     "ServerVersion": "*",
     "Main": "dev.scaffoldit.example.kotlin.KotlinExample"
 }

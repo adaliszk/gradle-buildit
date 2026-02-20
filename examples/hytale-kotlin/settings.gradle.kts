@@ -10,9 +10,13 @@ plugins {
 
 hytale {
     useKotlin("curse.maven:kytale-1428431:7464573")
+
     manifest {
         Group = "ScaffoldIt"
         Name = "Example"
         Main = "dev.scaffoldit.example.kotlin.KotlinExample"
+        Dependencies = mapOf(
+            "AmoAster:Kytale" to "*"
+        )
     }
 }
