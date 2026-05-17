@@ -11,6 +11,7 @@ import org.gradle.api.Project
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Copy
 
 class HytaleServerPlatform() : HytaleGradle.ConfigurePlatform {
@@ -87,9 +88,24 @@ class HytaleServerPlatform() : HytaleGradle.ConfigurePlatform {
                 it.url = project.uri("https://maven.hytale.com/${patchline.repo}")
             }
         }
-        with(project.dependencies) {
-            log.lifecycle("> Deps :${project.name}.implementation('com.hypixel.hytale:Server:$version')")
-            add("implementation", "com.hypixel.hytale:Server:$version")
+        val versionDisplay = if (version == "latest") "<latest, resolved lazily from maven-metadata.xml>" else version
+        log.lifecycle("> Deps :${project.name}.implementation('com.hypixel.hytale:Server:$versionDisplay')")
+        project.dependencies.addProvider(
+            "implementation",
+            serverVersionProvider().map { "com.hypixel.hytale:Server:$it" }
+        )
+    }
+
+    private fun serverVersionProvider(): Provider<String> {
+        if (version != "latest") {
+            return project.provider { version }
+        }
+        val patchlineRepo = patchline.repo
+        return project.providers.of(MavenMetadataLatestVersion::class.java) { spec ->
+            spec.parameters.metadataUrl.set(
+                "https://maven.hytale.com/$patchlineRepo/com/hypixel/hytale/Server/maven-metadata.xml"
+            )
+            spec.parameters.fallback.set("+")
         }
     }
 
