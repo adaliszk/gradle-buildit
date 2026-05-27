@@ -17,7 +17,7 @@ object HytaleGradle {
 
         var version: String
         fun useVersion(version: String) {
-            this.version = version.replace("latest", "+")
+            this.version = version
             HytaleExtension.version = this.version
         }
 
