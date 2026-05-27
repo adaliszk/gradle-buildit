@@ -18,7 +18,7 @@ dependencies {
     implementation(kotlin("stdlib"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
     implementation("net.bytebuddy:byte-buddy-agent:1.14.18")
-    compileOnly("com.hypixel.hytale:Server:+")
+    compileOnly("com.hypixel.hytale:Server:0.5.2")
 }
 
 sourceSets {
