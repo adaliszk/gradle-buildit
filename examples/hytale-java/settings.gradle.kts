@@ -9,20 +9,12 @@ plugins {
 }
 
 hytale {
-    // usePatchline("pre-release")
-
-    repositories {
-        maven("https://repo.codemc.io/repository/creatorfromhell")
-    }
-
-    dependencies {
-        compileOnly("net.cfh.vault:VaultUnlocked:2.18.3")
-    }
+    useVersion("0.5.2")
 
     manifest {
         Group = "ScaffoldIt"
         Name = "Example"
         Main = "dev.scaffoldit.example.java.JavaExample"
-        ServerVersion = "2026.02.18-f3b8fff95"
+        ServerVersion = ">=0.5.2"
     }
 }

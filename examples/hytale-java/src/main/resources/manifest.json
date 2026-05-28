@@ -6,6 +6,6 @@
     "Authors": [],
     "DisabledByDefault": false,
     "IncludesAssetPack": false,
-    "ServerVersion": "2026.02.18-f3b8fff95",
+    "ServerVersion": ">=0.5.2",
     "Main": "dev.scaffoldit.example.java.JavaExample"
 }
