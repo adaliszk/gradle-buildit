@@ -53,15 +53,15 @@ and flexible toolkit for mod development for Hytale, _and later for Minecraft._
 <!-- <td><b>CI/CI integration</b><br/> Generate popular pipelines for automation or have the hooks for custom solutions.</td> -->
 <!-- <td><b>Publishing to CurseForge</b><br/> Remove one more obstacle to distribute your mod by autmating the process.</td> -->
 
+> [!INFO]
+> Currently a rewrite is on going with the learnings of 0.2!
+
 > [!NOTE]
-> Latest update (`0.2.9 → 0.2.14`):
-> - Upgraded to Kotlin 2.3.10
-> - Fix quotation usage to IDEA configuration where it is necessary ([#12](https://github.com/adaliszk/gradle-scaffoldit-modkit/issues/12))
-> - Separated the Assets.zip resolution to allow builds without it ([#18](https://github.com/adaliszk/gradle-scaffoldit-modkit/issues/18))
-> - Separate Toolchain and Project plugins to avoid immutable errors ([#13](https://github.com/adaliszk/gradle-scaffoldit-modkit/issues/13))
-> - Fix :setupServer evaluation error ([#21](https://github.com/adaliszk/gradle-scaffoldit-modkit/issues/21))
-> - Fix IDEA configuration NPE with multi-module setup ([#22](https://github.com/adaliszk/gradle-scaffoldit-modkit/issues/22))
-> - Fix :runServer missing CLI arguments (missing HytaleAssets shutdown)
+> Latest update (`0.2.16`):
+> - Moved asset resolution to Dev Server only, enabling CI/CD runners to build
+> - Merged "latest" resolution via the maven mafiest over `+` selector
+> - Added versioned and latest install path resolution for Assets.zip
+> - Updated DevTools Plugin to 0.5.2
 
 See the whole [CHANGELOG](CHANGELOG.md)
 

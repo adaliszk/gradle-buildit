@@ -1,3 +1,13 @@
+## 0.2.16
+
+- Merged "latest" resolution via the maven mafiest over `+` selector
+- Added versioned and latest install path resolution for Assets.zip
+- Updated DevTools Plugin to 0.5.2
+
+## 0.2.15
+
+- Moved asset resolution to Dev Server only, enabling CI/CD runners to build
+
 ## 0.2.14
 
 - Fix :runServer missing CLI arguments (missing HytaleAssets shutdown)
