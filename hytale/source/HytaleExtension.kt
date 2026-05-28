@@ -28,7 +28,7 @@ abstract class HytaleExtension :
     companion object {
         // Configuration for Hytale
         var patchline: String = "release"
-        var version: String = "+"
+        var version: String = "latest"
     }
 
     internal val pfx: String = "> Plug "

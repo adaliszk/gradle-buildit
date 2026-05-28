@@ -146,25 +146,24 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
         resolveAssets()
     }
 
-    private fun resolveAssets(): File {
+    private fun resolveAssets(): File? {
         val patchline = HytaleExtension.patchline
         val version = HytaleExtension.version.replace("+", "latest")
 
         val downloadPath = homePath.resolve("$version/Assets.zip")
         log.debug("> Hytale :${project.name}.downloadPath: ${downloadPath.canonicalPath}")
 
-        val installPath = homePath.resolve("install/$patchline/package/game/$version/Assets.zip")
-        log.debug("> Hytale :${project.name}.installPath: ${installPath.canonicalPath}")
+        val versionPath = homePath.resolve("install/$patchline/package/game/$version/Assets.zip")
+        log.debug("> Hytale :${project.name}.installPath: ${versionPath.canonicalPath}")
+
+        val latestPath = homePath.resolve("install/$patchline/package/game/latest/Assets.zip")
+        log.debug("> Hytale :${project.name}.installPath: ${latestPath.canonicalPath}")
 
         return when (true) {
             downloadPath.exists() -> downloadPath
-            installPath.exists() -> installPath
-            else -> throw GradleException(
-                "Assets are not present, without that it is not possible to run a server! " +
-                    "Please download the ${HytaleExtension.patchline} via the Hytale Launcher " +
-                    "which should download into `$homePath`, but you can overwrite that with " +
-                    "the `hytale.home_path` gradle.properties entry!"
-            )
+            versionPath.exists() -> versionPath
+            latestPath.exists() -> latestPath
+            else -> null
         }
     }
 
@@ -199,7 +198,9 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
 
         val manifestTask = project.tasks.named("generateManifest")
         val buildTask = project.tasks.named("classes")
+        val setupTask = project.tasks.named("setupServer")
 
+        val assetsFile = resolveAssets()
         val serverArgs = createServerRunArgumentsList()
         log.lifecycle("> Hytale: :runServer:$serverArgs")
 
@@ -207,7 +208,7 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
             description =
                 "Runs the devserver, use -Ddebug for opening a debugger and allow hot-swapping"
             group = "hytale"
-            dependsOn(manifestTask, buildTask)
+            dependsOn(setupTask, manifestTask, buildTask)
 
             standardInput = System.`in`
             classpath(runtimeClassPath, projectOutput)
@@ -230,6 +231,15 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
             args(serverArgs)
 
             doLast {
+                if (assetsFile == null) {
+                    throw GradleException(
+                        "Assets are not present, without that it is not possible to run a server! " +
+                            "Please download the ${HytaleExtension.patchline} via the Hytale Launcher " +
+                            "which should download into `$homePath`, but you can overwrite that with " +
+                            "the `hytale.home_path` gradle.properties entry!"
+                    )
+                }
+
                 if (!devserverPath.exists()) {
                     throw GradleException(
                         "Devserver has not been initialized in $devserverDir yet, " +
@@ -298,7 +308,7 @@ class HytaleDevServerRun : HytaleGradle.ConfigureIdeaDev {
     private fun createServerRunArguments(): Map<String, String?> {
         val assetsFile = resolveAssets()
         val params = devserver.toArgs().toMutableMap()
-        params["--assets"] = "${assetsFile.canonicalPath}"
+        params["--assets"] = assetsFile?.canonicalPath.toString()
         val modPaths = mutableListOf<String>().also {
             it.add(sourcePath.canonicalPath)
             if (devserver.IncludeUserMods) {
